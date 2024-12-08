@@ -5,6 +5,7 @@
 #include "EspacioParqueadero.h"
 #include "Auto.h"
 #include "Propietario.h"
+#include "HistorialEstacionamiento.h"
 using namespace std;
 
 class Parqueadero {

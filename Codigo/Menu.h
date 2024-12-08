@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <conio.h> // Para _getch()
+#include <conio.h> 
 #include "Parqueadero.h"
 #include "HistorialEstacionamiento.h"
 #include "AutosPermitidos.h"

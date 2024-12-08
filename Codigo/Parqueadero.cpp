@@ -95,7 +95,6 @@ pair<Auto, Propietario> obtenerDatosPorPlaca(const string& placa) {
     throw runtime_error("Placa no encontrada en Autos_permitidos.txt");
 }
 
-// Modificar estacionarAuto para guardar más datos
 void Parqueadero::estacionarAuto(const Auto& autoObj, const Propietario& propietario, const string& espacioId) {
     Nodo* espacio = EspacioParqueadero().buscarEspacio(espacioId, espacios);
     if (espacio && !espacio->ocupado) {
@@ -127,6 +126,11 @@ void Parqueadero::estacionarAuto(const Auto& autoObj, const Propietario& propiet
                      << espacio->fechaHoraIngreso << ",\n";
                 file.close();
             }
+
+            HistorialEstacionamiento historial;
+            historial.registrarEntrada(autoCompleto.getPlaca(), autoCompleto.getMarca(), autoCompleto.getColor(),
+                                        propietarioCompleto.getNombre(), propietarioCompleto.getCedula(), propietarioCompleto.getCorreo(),
+                                        espacioId, espacio->fechaHoraIngreso);
 
             guardarDatos();
             cout << "Auto estacionado correctamente en el espacio " << espacioId << endl;
@@ -160,6 +164,9 @@ void Parqueadero::retirarAuto(const string& placa) {
             ofstream outFile(archivoEspacio, ios::trunc);
             outFile << nuevoContenido;
             outFile.close();
+
+            HistorialEstacionamiento historial;
+            historial.registrarSalida(placa, actual->id, actual->fechaHoraSalida);
 
             // Liberar el espacio
             EspacioParqueadero().liberarEspacio(actual);

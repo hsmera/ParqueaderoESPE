@@ -1,127 +1,102 @@
 #include "HistorialEstacionamiento.h"
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include <algorithm> 
 
-// Leer todo el archivo en memoria
-vector<string> HistorialEstacionamiento::leerArchivo() {
-    ifstream file(archivoHistorial);
-    vector<string> contenido;
-
-    if (!file.is_open()) {
-        cerr << "Error al abrir el archivo de historial: " << archivoHistorial << endl;
-        return contenido;
+void HistorialEstacionamiento::registrarEntrada(const string& placa, const string& marca, const string& color,
+                                                const string& nombrePropietario, const string& cedula, const string& correo,
+                                                const string& espacioId, const string& fechaHoraEntrada) {
+    ofstream file(archivoHistorial, ios::app);
+    if (file.is_open()) {
+        file << placa << "," << marca << "," << color << ","
+             << nombrePropietario << "," << cedula << "," << correo << ","
+             << espacioId << "," << fechaHoraEntrada << ",\n";
+        file.close();
+    } else {
+        cerr << "Error al abrir el archivo del historial para registrar entrada." << endl;
     }
-
-    string linea;
-    while (getline(file, linea)) {
-        contenido.push_back(linea);
-    }
-
-    file.close();
-    return contenido;
 }
 
-// Sobrescribir todo el archivo con contenido nuevo
-void HistorialEstacionamiento::escribirArchivo(const vector<string>& contenido) {
-    ofstream file(archivoHistorial, ios::trunc);
-
+void HistorialEstacionamiento::registrarSalida(const string& placa, const string& espacioId, const string& fechaHoraSalida) {
+    ifstream file(archivoHistorial);
     if (!file.is_open()) {
-        cerr << "Error al abrir el archivo de historial para escritura: " << archivoHistorial << endl;
+        cerr << "Error al abrir el archivo del historial para registrar salida." << endl;
         return;
     }
 
-    for (const string& linea : contenido) {
-        file << linea << endl;
+    string linea, nuevoContenido;
+    bool actualizado = false;
+
+    while (getline(file, linea)) {
+        stringstream ss(linea);
+        string datos[8]; // Placa, Marca, Color, Nombre, Cedula, Correo, EspacioID, FechaHoraEntrada
+        for (int i = 0; i < 8 && getline(ss, datos[i], ','); ++i);
+
+        if (datos[0] == placa && datos[6] == espacioId && datos[7].empty()) { // Buscar entrada sin salida
+            linea.pop_back(); // Quitar la coma final
+            linea += fechaHoraSalida;
+            actualizado = true;
+        }
+
+        nuevoContenido += linea + "\n";
     }
 
     file.close();
-}
 
-// Registrar la entrada de un auto
-void HistorialEstacionamiento::registrarEntrada(const Auto& autoObj, const Propietario& propietario, const string& espacioId, const string& fechaHoraIngreso) {
-    vector<string> contenido = leerArchivo();
-    bool placaEncontrada = false;
-
-    for (string& linea : contenido) {
-        stringstream ss(linea);
-        string placa;
-        getline(ss, placa, ',');
-
-        if (placa == autoObj.getPlaca()) {
-            // Agregar entrada acumulativa
-            linea += espacioId + ":" + fechaHoraIngreso + "|";
-            placaEncontrada = true;
-            break;
+    if (actualizado) {
+        ofstream outFile(archivoHistorial, ios::trunc);
+        if (outFile.is_open()) {
+            outFile << nuevoContenido;
+            outFile.close();
+        } else {
+            cerr << "Error al guardar el archivo del historial actualizado." << endl;
         }
+    } else {
+        cerr << "No se encontró una entrada para registrar la salida del auto con placa " << placa << "." << endl;
     }
-
-    if (!placaEncontrada) {
-        // Crear un nuevo registro si no existe la placa
-        string nuevaEntrada = autoObj.getPlaca() + "," +
-                              autoObj.getMarca() + "," +
-                              autoObj.getColor() + "," +
-                              propietario.getNombre() + "," +
-                              propietario.getCedula() + "," +
-                              propietario.getCorreo() + "," +
-                              espacioId + ":" + fechaHoraIngreso + "|";
-        contenido.push_back(nuevaEntrada);
-    }
-
-    escribirArchivo(contenido);
 }
 
-// Registrar la salida de un auto
-void HistorialEstacionamiento::registrarSalida(const string& placa, const string& fechaHoraSalida) {
-    vector<string> contenido = leerArchivo();
-    bool actualizado = false;
-
-    for (string& linea : contenido) {
-        stringstream ss(linea);
-        string p;
-        getline(ss, p, ',');
-
-        if (p == placa) {
-            // Actualizar la última entrada acumulativa con la hora de salida
-            size_t posUltimo = linea.find_last_of('|');
-            if (posUltimo != string::npos && linea[posUltimo - 1] != '-') {
-                linea.insert(posUltimo, "-" + fechaHoraSalida);
-                actualizado = true;
-                break;
-            }
-        }
-    }
-
-    if (!actualizado) {
-        cerr << "Error: No se encontró una entrada activa para la placa " << placa << ".\n";
-    }
-
-    escribirArchivo(contenido);
-}
-
-// Obtener el historial de una placa
-string HistorialEstacionamiento::obtenerHistorialPorPlaca(const string& placa) {
-    vector<string> contenido = leerArchivo();
-
-    for (const string& linea : contenido) {
-        stringstream ss(linea);
-        string p;
-        getline(ss, p, ',');
-
-        if (p == placa) {
-            return linea;
-        }
-    }
-
-    return "Historial no encontrado para la placa: " + placa;
-}
-
-// Mostrar el historial completo
 void HistorialEstacionamiento::mostrarHistorialCompleto() {
-    vector<string> contenido = leerArchivo();
+    ifstream file(archivoHistorial);
+    if (!file.is_open()) {
+        cerr << "Error al abrir el archivo del historial para mostrar datos." << endl;
+        return;
+    }
 
+    string linea;
     cout << "\nHistorial Completo:\n";
-    for (const string& linea : contenido) {
+    cout << "Placa | Marca | Color | Propietario | Cedula | Correo | Espacio | Entrada | Salida\n";
+    while (getline(file, linea)) {
+        replace(linea.begin(), linea.end(), ',', '|');
         cout << linea << endl;
     }
+    file.close();
+}
+
+bool HistorialEstacionamiento::obtenerHistorialPorPlaca(const string& placa) {
+    ifstream file(archivoHistorial);
+    if (!file.is_open()) {
+        cerr << "Error al abrir el archivo del historial para filtrar por placa." << endl;
+        return false;
+    }
+
+    string linea;
+    bool encontrado = false;
+
+    cout << "\nHistorial para la placa: " << placa << "\n";
+    cout << "Placa | Marca | Color | Propietario | Cedula | Correo | Espacio | Entrada | Salida\n";
+
+    while (getline(file, linea)) {
+        if (linea.find(placa + ",") == 0) { // Línea comienza con la placa
+            encontrado = true;
+            replace(linea.begin(), linea.end(), ',', '|');
+            cout << linea << endl;
+        }
+    }
+
+    file.close();
+
+    if (!encontrado) {
+        cout << "No se encontraron registros para la placa " << placa << "." << endl;
+    }
+
+    return encontrado;
 }

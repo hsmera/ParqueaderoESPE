@@ -130,7 +130,7 @@ void Menu::mostrarSubmenuAutosPermitidos() {
         } else if (tecla == '\r') {
             system("cls");
             if (seleccionSubmenu == 0) {
-                autosPermitidos->mostrarAutos();
+                autosPermitidos->mostrarAutos() ;
             } else if (seleccionSubmenu == 1) {
                 string placa;
                 cout << "Ingrese la placa del auto: ";
@@ -187,7 +187,6 @@ void Menu::mostrarSubmenuHistorial() {
     }
 }
 
-// Inicia el ciclo del menú
 void Menu::iniciar() {
     while (true) {
         mostrarMenu();
