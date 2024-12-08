@@ -1,192 +1,143 @@
 #include "Parqueadero.h"
-#include <iostream>
-#include <chrono>
-#include <iomanip>
-#include <sstream>
-#include <fstream>
 
-// Constructor: Inicializa la lista circular y carga los datos
-Parqueadero::Parqueadero() {
-    EspacioParqueadero gestorEspacios;
-    
-    // Verificar si el archivo de estado existe y tiene datos
-    ifstream file(archivoParqueadero);
-    if (file.is_open() && file.peek() != ifstream::traits_type::eof()) {
-        espacios = gestorEspacios.crearListaCircular(capacidad);
-        cargarDatos(); // Cargar el estado desde el archivo
-    } else {
-        // Si no hay datos, crear una nueva lista circular
-        espacios = gestorEspacios.crearListaCircular(capacidad);
-        guardarDatos(); // Guardar el estado inicial (vacío)
-    }
-    file.close();
+// Constructor: Inicializa el parqueadero
+Parqueadero::Parqueadero() : head(nullptr) {
+    inicializarEspacios();
+    cargarDesdeArchivo();
 }
 
-// Cargar datos desde archivos
-void Parqueadero::cargarDatos() {
-    ifstream file(archivoParqueadero);
-    if (file.is_open()) {
-        string linea;
-        while (getline(file, linea)) {
-            size_t delimPos = linea.find(',');
-            string id = linea.substr(0, delimPos);
-            bool ocupado = (linea.substr(delimPos + 1) == "1");
-
-            Nodo* espacio = EspacioParqueadero().buscarEspacio(id, espacios);
-            if (espacio) {
-                espacio->ocupado = ocupado;
-                espacio->placa = ocupado ? espacio->placa : ""; // Limpia la placa si está libre
-            }
-        }
-        file.close();
-    }
-}
-
-// Guardar estado en archivos
-void Parqueadero::guardarDatos() {
-    ofstream file(archivoParqueadero, ios::trunc);
-    Nodo* actual = espacios;
-    if (file.is_open()) {
+// Destructor: Libera la memoria asignada
+Parqueadero::~Parqueadero() {
+    Nodo* temp = head;
+    if (head) {
         do {
-            file << actual->id << "," << (actual->ocupado ? "1" : "0") << endl;
-            actual = actual->siguiente;
-        } while (actual != espacios);
-        file.close();
+            Nodo* siguiente = temp->siguiente;
+            delete temp;
+            temp = siguiente;
+        } while (temp != head);
     }
 }
 
-string obtenerFechaHoraActual() {
-    auto ahora = chrono::system_clock::now();
-    time_t tiempo = chrono::system_clock::to_time_t(ahora);
-    tm localTime = *localtime(&tiempo);
-    stringstream ss;
-    ss << put_time(&localTime, "%Y-%m-%d %H:%M:%S");
-    return ss.str();
+// Inicializar espacios en la lista doblemente enlazada circular
+void Parqueadero::inicializarEspacios() {
+    for (int i = 1; i <= capacidad; i++) {
+        string id = (i < 10 ? "0" : "") + to_string(i);
+        Nodo* nuevoEspacio = manejadorEspacios.crearEspacio(id);
+
+        if (!head) {
+            head = nuevoEspacio;
+            head->siguiente = head;
+            head->anterior = head;
+        } else {
+            Nodo* ultimo = head->anterior;
+            ultimo->siguiente = nuevoEspacio;
+            nuevoEspacio->anterior = ultimo;
+            nuevoEspacio->siguiente = head;
+            head->anterior = nuevoEspacio;
+        }
+    }
 }
 
-pair<Auto, Propietario> obtenerDatosPorPlaca(const string& placa) {
-    ifstream file("Autos_permitidos.txt");
-    if (!file.is_open()) {
-        cerr << "No se pudo abrir el archivo Autos_permitidos.txt" << endl;
-        throw runtime_error("Error al abrir archivo de autos permitidos");
+// Cargar estado del parqueadero desde el archivo
+void Parqueadero::cargarDesdeArchivo() {
+    ifstream archivoEntrada(archivoParqueadero);
+    if (!archivoEntrada.is_open()) {
+        cerr << "No se pudo abrir el archivo " << archivoParqueadero << ". Creando uno nuevo." << endl;
+        return;
     }
 
+    Nodo* temp = head;
     string linea;
-    while (getline(file, linea)) {
+    while (getline(archivoEntrada, linea)) {
         stringstream ss(linea);
-        string p, marca, color, nombre, cedula, correo;
+        string id, placa;
+        bool ocupado;
 
-        // Descomponer línea en campos
-        getline(ss, p, ',');
-        getline(ss, marca, ',');
-        getline(ss, color, ',');
-        getline(ss, nombre, ',');
-        getline(ss, cedula, ',');
-        getline(ss, correo, ',');
+        ss >> id >> ocupado >> placa;
 
-        if (p == placa) {
-            file.close();
-            Auto autoObj(p, marca, color);
-            Propietario propietario(nombre, cedula, correo);
-            return make_pair(autoObj, propietario);
+        if (temp && temp->id == id) {
+            temp->ocupado = ocupado;
+            temp->placa = ocupado ? placa : "";
+            temp = temp->siguiente;
         }
     }
-    file.close();
-    throw runtime_error("Placa no encontrada en Autos_permitidos.txt");
+    archivoEntrada.close();
 }
 
-void Parqueadero::estacionarAuto(const Auto& autoObj, const Propietario& propietario, const string& espacioId) {
-    Nodo* espacio = EspacioParqueadero().buscarEspacio(espacioId, espacios);
-    if (espacio && !espacio->ocupado) {
-        try {
-            // Obtener datos completos desde Autos_permitidos.txt
-            auto datos = obtenerDatosPorPlaca(autoObj.getPlaca());
-            const Auto& autoCompleto = datos.first;
-            const Propietario& propietarioCompleto = datos.second;
-
-            // Registrar datos en el nodo
-            EspacioParqueadero().ocuparEspacio(espacio, autoCompleto.getPlaca());
-            espacio->marca = autoCompleto.getMarca();
-            espacio->color = autoCompleto.getColor();
-            espacio->nombrePropietario = propietarioCompleto.getNombre();
-            espacio->cedula = propietarioCompleto.getCedula();
-            espacio->correo = propietarioCompleto.getCorreo();
-            espacio->fechaHoraIngreso = obtenerFechaHoraActual();
-
-            // Guardar en archivo
-            ofstream file(archivoEspacio, ios::app);
-            if (file.is_open()) {
-                file << espacio->id << "," 
-                     << espacio->placa << ","
-                     << espacio->marca << ","
-                     << espacio->color << ","
-                     << espacio->nombrePropietario << ","
-                     << espacio->cedula << ","
-                     << espacio->correo << ","
-                     << espacio->fechaHoraIngreso << ",\n";
-                file.close();
-            }
-
-            HistorialEstacionamiento historial;
-            historial.registrarEntrada(autoCompleto.getPlaca(), autoCompleto.getMarca(), autoCompleto.getColor(),
-                                        propietarioCompleto.getNombre(), propietarioCompleto.getCedula(), propietarioCompleto.getCorreo(),
-                                        espacioId, espacio->fechaHoraIngreso);
-
-            guardarDatos();
-            cout << "Auto estacionado correctamente en el espacio " << espacioId << endl;
-        } catch (const exception& e) {
-            cerr << "Error al estacionar el auto: " << e.what() << endl;
-        }
-    } else {
-        cout << "Espacio no disponible o ya ocupado.\n";
+// Guardar estado del parqueadero en el archivo
+void Parqueadero::guardarEnArchivo() {
+    ofstream archivoSalida(archivoParqueadero, ios::trunc);
+    if (!archivoSalida.is_open()) {
+        cerr << "Error al abrir el archivo " << archivoParqueadero << " para guardar." << endl;
+        return;
     }
-}
 
-void Parqueadero::retirarAuto(const string& placa) {
-    Nodo* actual = espacios;
+    Nodo* temp = head;
     do {
-        if (actual->placa == placa) {
-            // Registrar salida
-            actual->fechaHoraSalida = obtenerFechaHoraActual();
-            
-            // Actualizar archivo
-            fstream file(archivoEspacio, ios::in | ios::out);
-            string linea, nuevoContenido;
-            while (getline(file, linea)) {
-                if (linea.find(actual->id + "," + placa) != string::npos && linea.back() == ',') {
-                    linea.pop_back(); // Quitar la última coma
-                    linea += actual->fechaHoraSalida;
-                }
-                nuevoContenido += linea + "\n";
-            }
-            file.close();
+        archivoSalida << temp->id << " "
+                      << temp->ocupado << " "
+                      << (temp->ocupado ? temp->placa : "") << "\n";
+        temp = temp->siguiente;
+    } while (temp != head);
 
-            ofstream outFile(archivoEspacio, ios::trunc);
-            outFile << nuevoContenido;
-            outFile.close();
-
-            HistorialEstacionamiento historial;
-            historial.registrarSalida(placa, actual->id, actual->fechaHoraSalida);
-
-            // Liberar el espacio
-            EspacioParqueadero().liberarEspacio(actual);
-            guardarDatos();
-
-            cout << "Auto retirado del espacio " << actual->id << endl;
-            return;
-        }
-        actual = actual->siguiente;
-    } while (actual != espacios);
-
-    cout << "No se encontró un auto con esa placa.\n";
+    archivoSalida.close();
 }
 
-void Parqueadero::mostrarEstado() {
-    Nodo* actual = espacios;
+// Mostrar el estado actual del parqueadero
+void Parqueadero::mostrarEstado() const {
+    Nodo* actual = head;
     cout << "\nEstado del Parqueadero:\n";
-    do {
+
+    // Imprime los primeros 6 espacios en la parte superior
+    for (int i = 0; i < 6; ++i) {
+        if (actual == nullptr) break;  // Si no hay más nodos, salimos
         cout << (actual->ocupado ? "\033[31m" : "\033[0m") << "[" << actual->id << "] ";
         actual = actual->siguiente;
-    } while (actual != espacios);
-    cout << "\033[0m\n";
+    }
+    cout << "\n";
+
+    // Imprime los siguientes 6 espacios en la parte inferior
+    for (int i = 0; i < 6; ++i) {
+        if (actual == nullptr) break;  // Si no hay más nodos, salimos
+        cout << (actual->ocupado ? "\033[31m" : "\033[0m") << "[" << actual->id << "] ";
+        actual = actual->siguiente;
+    }
+    cout << "\033[0m\n";  // Resetea el color al valor por defecto
+}
+
+// Estacionar un auto en un espacio específico
+bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
+    Nodo* temp = head;
+    do {
+        if (temp->id == espacioId) {
+            if (!temp->ocupado) {
+                manejadorEspacios.ocuparEspacio(temp, placa);
+                guardarEnArchivo();
+                return true;
+            } else {
+                cout << "El espacio " << espacioId << " ya está ocupado." << endl;
+                return false;
+            }
+        }
+        temp = temp->siguiente;
+    } while (temp != head);
+
+    cout << "Espacio " << espacioId << " no encontrado." << endl;
+    return false;
+}
+
+// Retirar un auto por su placa
+bool Parqueadero::retirarAuto(const string& placa) {
+    Nodo* temp = head;
+    do {
+        if (temp->ocupado && temp->placa == placa) {
+            manejadorEspacios.liberarEspacio(temp);
+            guardarEnArchivo();
+            return true;
+        }
+        temp = temp->siguiente;
+    } while (temp != head);
+
+    cout << "No se encontró un auto con la placa " << placa << "." << endl;
+    return false;
 }

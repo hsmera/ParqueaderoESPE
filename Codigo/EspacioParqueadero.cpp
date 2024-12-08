@@ -1,60 +1,38 @@
 #include "EspacioParqueadero.h"
 
-Nodo* EspacioParqueadero::crearListaCircular(int cantidad) {
-    Nodo* inicio = nullptr;
-    Nodo* temp = nullptr;
-
-    for (int i = 1; i <= cantidad; i++) {
-        Nodo* nuevo = new Nodo();
-        nuevo->id = (i < 10) ? "0" + to_string(i) : to_string(i);
-        nuevo->ocupado = false;
-        nuevo->placa = "";
-
-        if (inicio == nullptr) {
-            inicio = nuevo;
-            inicio->siguiente = inicio;
-            inicio->anterior = inicio;
-        } else {
-            temp->siguiente = nuevo;
-            nuevo->anterior = temp;
-            nuevo->siguiente = inicio;
-            inicio->anterior = nuevo;
-        }
-        temp = nuevo;
-    }
-    return inicio;
+// Crear un nuevo nodo de espacio
+Nodo* EspacioParqueadero::crearEspacio(const string& id) {
+    return new Nodo(id);
 }
 
-Nodo* EspacioParqueadero::buscarEspacio(string id, Nodo* inicio) {
-    Nodo* actual = inicio;
-    do {
-        if (actual->id == id) {
-            return actual;
-        }
-        actual = actual->siguiente;
-    } while (actual != inicio);
-    return nullptr; // No encontrado
-}
-
+// Ocupar un espacio con la placa del auto
 void EspacioParqueadero::ocuparEspacio(Nodo* espacio, const string& placa) {
-    if (espacio && !espacio->ocupado) {
+    if (!espacio->ocupado) {
         espacio->ocupado = true;
         espacio->placa = placa;
+        espacio->horaIngreso = time(nullptr);
+        cout << "Espacio " << espacio->id << " ocupado por el auto con placa " << placa << "." << endl;
+    } else {
+        cout << "El espacio " << espacio->id << " ya está ocupado." << endl;
     }
 }
 
+// Liberar un espacio ocupado
 void EspacioParqueadero::liberarEspacio(Nodo* espacio) {
-    if (espacio && espacio->ocupado) {
+    if (espacio->ocupado) {
         espacio->ocupado = false;
         espacio->placa = "";
+        espacio->horaIngreso = 0;
+        cout << "Espacio " << espacio->id << " liberado." << endl;
+    } else {
+        cout << "El espacio " << espacio->id << " ya está libre." << endl;
     }
 }
-string EspacioParqueadero::obtenerEstado(Nodo* inicio) {
-    Nodo* actual = inicio;
-    string estado;
-    do {
-        estado += actual->id + (actual->ocupado ? " Ocupado\n" : " Libre\n");
-        actual = actual->siguiente;
-    } while (actual != inicio);
-    return estado;
+
+// Obtener el estado de un espacio
+string EspacioParqueadero::obtenerEstado(const Nodo* espacio) const {
+    if (espacio->ocupado) {
+        return "Ocupado por " + espacio->placa;
+    }
+    return "Libre";
 }

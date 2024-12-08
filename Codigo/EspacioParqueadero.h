@@ -2,31 +2,28 @@
 #define ESPACIOPARQUEADERO_H
 
 #include <string>
+#include <ctime>
+#include <iostream>
 using namespace std;
 
 struct Nodo {
-    string id; 
-    bool ocupado; // true si está ocupado, false si está libre
-    string placa;        
-    string marca;       
-    string color;        
-    string nombrePropietario; 
-    string cedula;       
-    string correo;       
-    string fechaHoraIngreso; 
-    string fechaHoraSalida; 
-    Nodo* siguiente; 
-    Nodo* anterior; 
+    string id;         // Identificador del espacio (01-12)
+    bool ocupado;      // Estado del espacio (true = ocupado, false = libre)
+    string placa;      // Placa del auto estacionado (vacío si está libre)
+    time_t horaIngreso; // Tiempo de ingreso (0 si está libre)
+    Nodo* siguiente;
+    Nodo* anterior;
+
+    Nodo(const string& id)
+        : id(id), ocupado(false), placa(""), horaIngreso(0), siguiente(nullptr), anterior(nullptr) {}
 };
 
 class EspacioParqueadero {
 public:
-    Nodo* crearListaCircular(int cantidad);   // Inicializa la lista circular con cantidad nodos
-    Nodo* buscarEspacio(string id, Nodo* inicio); // Busca un espacio por ID
-    void ocuparEspacio(Nodo* espacio, const string& placa); // Marca un espacio como ocupado
-    void liberarEspacio(Nodo* espacio);      // Marca un espacio como libre
-    string obtenerEstado(Nodo* inicio);      // Devuelve el estado de todos los espacios
+    Nodo* crearEspacio(const string& id);
+    void ocuparEspacio(Nodo* espacio, const string& placa);
+    void liberarEspacio(Nodo* espacio);
+    string obtenerEstado(const Nodo* espacio) const;
 };
 
-#endif
-
+#endif // ESPACIOPARQUEADERO_H

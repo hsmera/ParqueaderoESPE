@@ -1,32 +1,31 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "Parqueadero.h"
+#include "AutosPermitidos.h"
+#include "HistorialEstacionamiento.h"
 #include <vector>
 #include <string>
 #include <iostream>
-#include <conio.h> 
-#include "Parqueadero.h"
-#include "HistorialEstacionamiento.h"
-#include "AutosPermitidos.h"
-
-using namespace std;
+#include <conio.h> // Para usar _getch()
 
 class Menu {
 private:
-    vector<string> opciones;                 // Opciones principales del menú
-    int seleccionActual = 0;                 // Índice de la opción seleccionada
-    Parqueadero* parqueadero;                // Instancia del parqueadero
-    HistorialEstacionamiento* historial;     // Instancia del historial
-    AutosPermitidos* autosPermitidos;        // Instancia de los autos permitidos
+    Parqueadero* parqueadero;
+    HistorialEstacionamiento* historial;
+    AutosPermitidos* autosPermitidos;
 
-    void mostrarMenu();                      // Muestra el menú principal
-    void ejecutarOpcion();                   // Ejecuta la opción seleccionada
-    void mostrarSubmenuAutosPermitidos();    // Submenú para autos permitidos
-    void mostrarSubmenuHistorial();          // Submenú para historial de estacionamientos
+    vector<string> opciones;
+    int seleccionActual;
+
+    void mostrarSubmenuAutosPermitidos();
+    void mostrarSubmenuHistorial();
 
 public:
-    Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a); // Constructor
-    void iniciar();                          // Inicia el ciclo del menú
+    Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);
+    void mostrarMenu();
+    void ejecutarOpcion();
+    void iniciar();
 };
 
-#endif 
+#endif // MENU_H

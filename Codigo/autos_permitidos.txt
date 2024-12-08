@@ -1,3 +1,2 @@
-1,e,e,e,e,e
-3,d,d,d,d,d
-4,s,s,s,s,s
+1,2,w,w,w,w
+43,rt,e,fd,df,df

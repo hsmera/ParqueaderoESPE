@@ -1,29 +1,29 @@
 #ifndef PARQUEADERO_H
 #define PARQUEADERO_H
 
-#include <string>
 #include "EspacioParqueadero.h"
-#include "Auto.h"
-#include "Propietario.h"
-#include "HistorialEstacionamiento.h"
-using namespace std;
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 class Parqueadero {
 private:
-    Nodo* espacios; // Lista circular de espacios de parqueo
-    const int capacidad = 12; // Número de espacios
-    const string archivoParqueadero = "parqueadero.txt"; 
-    const string archivoEspacio = "espacio_parqueadero.txt";
+    Nodo* head; // Nodo inicial de la lista doblemente enlazada circular
+    EspacioParqueadero manejadorEspacios;
+    const int capacidad = 12;
+    const string archivoParqueadero = "parqueadero.txt";
+
+    void inicializarEspacios();
+    void cargarDesdeArchivo();
+    void guardarEnArchivo();
 
 public:
     Parqueadero();
+    ~Parqueadero();
 
-    void cargarDatos();       // Carga datos desde archivos
-    void guardarDatos();      // Guarda el estado en archivos
-    void estacionarAuto(const Auto& autoObj, const Propietario& propietario, const string& espacioId);
-    void retirarAuto(const string& placa);
-    void mostrarEstado();     // Visualización gráfica
+    void mostrarEstado() const;
+    bool estacionarAuto(const string& placa, const string& espacioId);
+    bool retirarAuto(const string& placa);
 };
 
-#endif
-
+#endif // PARQUEADERO_H

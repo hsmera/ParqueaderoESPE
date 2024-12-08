@@ -1,7 +1,8 @@
 #include "Menu.h"
 
+// Constructor: Inicializa el menú con las opciones disponibles
 Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
-    : parqueadero(p), historial(h), autosPermitidos(a) {
+    : parqueadero(p), historial(h), autosPermitidos(a), seleccionActual(0) {
     opciones = {
         "Mostrar estado del parqueadero",
         "Estacionar un auto",
@@ -14,7 +15,7 @@ Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
     };
 }
 
-// Mostrar menú principal
+// Mostrar el menú principal
 void Menu::mostrarMenu() {
     system("cls");
     cout << "Sistema de Gestion de Parqueadero\n";
@@ -22,9 +23,9 @@ void Menu::mostrarMenu() {
 
     for (int i = 0; i < opciones.size(); i++) {
         if (i == seleccionActual) {
-            cout << " > " << opciones[i] << " <\n"; // Opción seleccionada.
+            cout << " > " << opciones[i] << " <\n"; // Opción seleccionada
         } else {
-            cout << "   " << opciones[i] << "\n"; // Opción no seleccionada.
+            cout << "   " << opciones[i] << "\n"; // Opción no seleccionada
         }
     }
 }
@@ -37,7 +38,7 @@ void Menu::ejecutarOpcion() {
             parqueadero->mostrarEstado();
             break;
         case 1: {
-            string placa, marca, color, espacioId, nombre, cedula, correo;
+            string placa, espacioId;
             cout << "Ingrese la placa del auto: ";
             cin >> placa;
             if (!autosPermitidos->buscarAuto(placa)) {
@@ -47,16 +48,18 @@ void Menu::ejecutarOpcion() {
             parqueadero->mostrarEstado();
             cout << "\nIngrese el ID del espacio a ocupar: ";
             cin >> espacioId;
-            Auto autoObj(placa, marca, color);
-            Propietario propietario(nombre, cedula, correo);
-            parqueadero->estacionarAuto(autoObj, propietario, espacioId);
+            if (parqueadero->estacionarAuto(placa, espacioId)) {
+                historial->registrarEntrada(placa, espacioId);
+            }
             break;
         }
         case 2: {
             string placa;
             cout << "Ingrese la placa del auto: ";
             cin >> placa;
-            parqueadero->retirarAuto(placa);
+            if (parqueadero->retirarAuto(placa)) {
+                historial->registrarSalida(placa);
+            }
             break;
         }
         case 3: {
@@ -101,7 +104,7 @@ void Menu::ejecutarOpcion() {
     system("pause");
 }
 
-// Mostrar el submenú de autos permitidos
+// Mostrar submenú de autos permitidos
 void Menu::mostrarSubmenuAutosPermitidos() {
     vector<string> opcionesAutos = {
         "Mostrar todos los autos permitidos",
@@ -123,14 +126,14 @@ void Menu::mostrarSubmenuAutosPermitidos() {
         }
 
         char tecla = _getch();
-        if (tecla == 72) {
+        if (tecla == 72) { // Flecha arriba
             seleccionSubmenu = (seleccionSubmenu - 1 + opcionesAutos.size()) % opcionesAutos.size();
-        } else if (tecla == 80) {
+        } else if (tecla == 80) { // Flecha abajo
             seleccionSubmenu = (seleccionSubmenu + 1) % opcionesAutos.size();
-        } else if (tecla == '\r') {
+        } else if (tecla == '\r') { // Enter
             system("cls");
             if (seleccionSubmenu == 0) {
-                autosPermitidos->mostrarAutos() ;
+                autosPermitidos->mostrarAutos();
             } else if (seleccionSubmenu == 1) {
                 string placa;
                 cout << "Ingrese la placa del auto: ";
@@ -145,7 +148,7 @@ void Menu::mostrarSubmenuAutosPermitidos() {
     }
 }
 
-// Mostrar el submenú del historial
+// Mostrar submenú del historial
 void Menu::mostrarSubmenuHistorial() {
     vector<string> opcionesHistorial = {
         "Mostrar historial completo",
@@ -167,19 +170,19 @@ void Menu::mostrarSubmenuHistorial() {
         }
 
         char tecla = _getch();
-        if (tecla == 72) {
+        if (tecla == 72) { // Flecha arriba
             seleccionSubmenu = (seleccionSubmenu - 1 + opcionesHistorial.size()) % opcionesHistorial.size();
-        } else if (tecla == 80) {
+        } else if (tecla == 80) { // Flecha abajo
             seleccionSubmenu = (seleccionSubmenu + 1) % opcionesHistorial.size();
-        } else if (tecla == '\r') {
+        } else if (tecla == '\r') { // Enter
             system("cls");
             if (seleccionSubmenu == 0) {
-                historial->mostrarHistorialCompleto();
+                historial->mostrarHistorial();
             } else if (seleccionSubmenu == 1) {
                 string placa;
                 cout << "Ingrese la placa del auto: ";
                 cin >> placa;
-                cout << historial->obtenerHistorialPorPlaca(placa) << endl;
+                cout << historial->buscarHistorial(placa) << endl;
             }
             system("pause");
             break;
@@ -187,17 +190,17 @@ void Menu::mostrarSubmenuHistorial() {
     }
 }
 
+// Iniciar el menú interactivo
 void Menu::iniciar() {
     while (true) {
         mostrarMenu();
         char tecla = _getch();
-        if (tecla == 72) {
+        if (tecla == 72) { // Flecha arriba
             seleccionActual = (seleccionActual - 1 + opciones.size()) % opciones.size();
-        } else if (tecla == 80) {
+        } else if (tecla == 80) { // Flecha abajo
             seleccionActual = (seleccionActual + 1) % opciones.size();
-        } else if (tecla == '\r') {
+        } else if (tecla == '\r') { // Enter
             ejecutarOpcion();
         }
     }
 }
-

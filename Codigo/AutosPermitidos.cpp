@@ -1,99 +1,107 @@
 #include "AutosPermitidos.h"
 
-void AutosPermitidos::cargarDatos() {
-    ifstream file(archivo);
-    if (!file.is_open()) {
-        cerr << "No se pudo abrir el archivo: " << archivo << endl;
+// Constructor: carga los datos desde el archivo
+AutosPermitidos::AutosPermitidos() {
+    cargarDesdeArchivo();
+}
+
+// Cargar autos permitidos desde el archivo
+void AutosPermitidos::cargarDesdeArchivo() {
+    ifstream archivoEntrada(archivo);
+    if (!archivoEntrada.is_open()) {
+        cerr << "No se pudo abrir el archivo " << archivo << ". Creando uno nuevo." << endl;
         return;
     }
-    
+
     string linea;
-    while (getline(file, linea)) {
-        size_t pos1 = linea.find(',');
-        size_t pos2 = linea.find(',', pos1 + 1);
-        size_t pos3 = linea.find(',', pos2 + 1);
-        size_t pos4 = linea.find(',', pos3 + 1);
-        size_t pos5 = linea.find(',', pos4 + 1);
+    while (getline(archivoEntrada, linea)) {
+        stringstream ss(linea);
+        string placa, marca, color, nombre, cedula, correo;
 
-        string placa = linea.substr(0, pos1);
-        string marca = linea.substr(pos1 + 1, pos2 - pos1 - 1);
-        string color = linea.substr(pos2 + 1, pos3 - pos2 - 1);
-        string nombre = linea.substr(pos3 + 1, pos4 - pos3 - 1);
-        string cedula = linea.substr(pos4 + 1, pos5 - pos4 - 1);
-        string correo = linea.substr(pos5 + 1);
+        getline(ss, placa, ',');
+        getline(ss, marca, ',');
+        getline(ss, color, ',');
+        getline(ss, nombre, ',');
+        getline(ss, cedula, ',');
+        getline(ss, correo, ',');
 
-        Auto autoObj(placa, marca, color);
+        Auto autoPermitido(placa, marca, color);
         Propietario propietario(nombre, cedula, correo);
-
-        autosPermitidos.push_back(make_pair(autoObj, propietario));
+        registros.emplace_back(autoPermitido, propietario);
     }
-    file.close();
+    archivoEntrada.close();
 }
 
-void AutosPermitidos::guardarDatos() const {
-    ofstream file(archivo, ios::trunc);
-    if (!file.is_open()) {
-        cerr << "No se pudo abrir el archivo: " << archivo << endl;
+// Guardar autos permitidos en el archivo
+void AutosPermitidos::guardarEnArchivo() {
+    ofstream archivoSalida(archivo, ios::trunc);
+    if (!archivoSalida.is_open()) {
+        cerr << "Error al abrir el archivo " << archivo << " para guardar." << endl;
         return;
     }
 
-    for (const auto& pair : autosPermitidos) {
-        file << pair.first.toString() << "," << pair.second.toString() << endl;
+    for (const auto& registro : registros) {
+        archivoSalida << registro.autoPermitido.placa << ","
+                      << registro.autoPermitido.marca << ","
+                      << registro.autoPermitido.color << ","
+                      << registro.propietario.nombre << ","
+                      << registro.propietario.cedula << ","
+                      << registro.propietario.correo << "\n";
     }
-    file.close();
+    archivoSalida.close();
 }
 
-void AutosPermitidos::agregarAuto(const Auto& autoObj, const Propietario& propietario) {
-    for (const auto& pair : autosPermitidos) {
-        if (pair.first.getPlaca() == autoObj.getPlaca()) {
-            cerr << "Error: Ya existe un auto con la placa " << autoObj.getPlaca() << endl;
+// Agregar un nuevo auto permitido
+void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& propietario) {
+    for (const auto& registro : registros) {
+        if (registro.autoPermitido.placa == autoPermitido.placa) {
+            cout << "El auto con placa " << autoPermitido.placa << " ya está registrado." << endl;
             return;
         }
     }
-    
-    autosPermitidos.push_back(make_pair(autoObj, propietario));
-    guardarDatos();
+
+    registros.emplace_back(autoPermitido, propietario);
+    guardarEnArchivo();
     cout << "Auto agregado correctamente." << endl;
 }
 
-void AutosPermitidos::mostrarAutos() const {
-    for (const auto& pair : autosPermitidos) {
-        cout << "Placa: " << pair.first.getPlaca()
-             << ", Marca: " << pair.first.getMarca()
-             << ", Color: " << pair.first.getColor()
-             << ", Propietario: " << pair.second.getNombre()
-             << ", Cedula: " << pair.second.getCedula()
-             << ", Correo: " << pair.second.getCorreo() << endl;
-    }
-}
-
-bool AutosPermitidos::eliminarAuto(const string& placa) {
-    for (auto it = autosPermitidos.begin(); it != autosPermitidos.end(); ++it) {
-        if (it->first.getPlaca() == placa) {
-            autosPermitidos.erase(it);
-            guardarDatos(); // Actualizar archivo
-            cout << "Auto con placa " << placa << " eliminado correctamente." << endl;
-            return true;
-        }
-    }
-    cout << "No se encontró un auto con la placa: " << placa << endl;
-    return false;
-}
-
+// Buscar un auto por placa
 bool AutosPermitidos::buscarAuto(const string& placa) const {
-    for (const auto& pair : autosPermitidos) {
-        if (pair.first.getPlaca() == placa) {
-            cout << "Auto encontrado: " << endl;
-            cout << "Placa: " << pair.first.getPlaca()
-                 << ", Marca: " << pair.first.getMarca()
-                 << ", Color: " << pair.first.getColor()
-                 << ", Propietario: " << pair.second.getNombre()
-                 << ", Cedula: " << pair.second.getCedula()
-                 << ", Correo: " << pair.second.getCorreo() << endl;
+    for (const auto& registro : registros) {
+        if (registro.autoPermitido.placa == placa) {
             return true;
         }
     }
-
-    cout << "No se encontró un auto con la placa: " << placa << endl;
     return false;
+}
+
+// Eliminar un auto permitido por placa
+void AutosPermitidos::eliminarAuto(const string& placa) {
+    for (auto it = registros.begin(); it != registros.end(); ++it) {
+        if (it->autoPermitido.placa == placa) {
+            registros.erase(it);
+            guardarEnArchivo();
+            cout << "Auto eliminado correctamente." << endl;
+            return;
+        }
+    }
+    cout << "No se encontró un auto con la placa " << placa << "." << endl;
+}
+
+// Mostrar todos los autos permitidos
+void AutosPermitidos::mostrarAutos() const {
+    if (registros.empty()) {
+        cout << "No hay autos permitidos registrados." << endl;
+        return;
+    }
+
+    cout << "Autos Permitidos:\n";
+    for (const auto& registro : registros) {
+        cout << "Placa: " << registro.autoPermitido.placa
+             << ", Marca: " << registro.autoPermitido.marca
+             << ", Color: " << registro.autoPermitido.color
+             << ", Propietario: " << registro.propietario.nombre
+             << ", Cedula: " << registro.propietario.cedula
+             << ", Correo: " << registro.propietario.correo << endl;
+    }
 }
