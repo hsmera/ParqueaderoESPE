@@ -1,9 +1,7 @@
 #include "Menu.h"
 
-// Constructor
 Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
     : parqueadero(p), historial(h), autosPermitidos(a) {
-    // Inicializamos las opciones del menú.
     opciones = {
         "Mostrar estado del parqueadero",
         "Estacionar un auto",

@@ -5,30 +5,24 @@
 #include "EspacioParqueadero.h"
 #include "Auto.h"
 #include "Propietario.h"
-
 using namespace std;
 
 class Parqueadero {
 private:
-    Nodo* espacios;                      // Lista circular que representa los espacios del parqueadero
-    const int capacidad = 12;            // Capacidad del parqueadero
-    const string archivoParqueadero = "parqueadero.txt"; // Archivo para guardar el estado del parqueadero
-    const string archivoEspacio = "espacio_parqueadero.txt"; // Archivo para detalles de los espacios
-
-    void cargarDatos();                  // Carga el estado del parqueadero desde un archivo
-    void guardarDatos();                 // Guarda el estado actual del parqueadero en un archivo
-    pair<Auto, Propietario> obtenerDatosPorPlaca(const string& placa); // Obtiene datos completos desde archivo externo
-    string obtenerFechaHoraActual();     // Obtiene la fecha y hora actuales en formato legible
+    Nodo* espacios; // Lista circular de espacios de parqueo
+    const int capacidad = 12; // Número de espacios
+    const string archivoParqueadero = "parqueadero.txt"; 
+    const string archivoEspacio = "espacio_parqueadero.txt";
 
 public:
-    Parqueadero();                       // Constructor que inicializa el parqueadero y carga los datos
+    Parqueadero();
 
+    void cargarDatos();       // Carga datos desde archivos
+    void guardarDatos();      // Guarda el estado en archivos
     void estacionarAuto(const Auto& autoObj, const Propietario& propietario, const string& espacioId);
-                                         // Estaciona un auto en un espacio específico
-
-    void retirarAuto(const string& placa); // Retira un auto del parqueadero usando la placa
-
-    void mostrarEstado();                // Muestra el estado actual del parqueadero (ocupado/libre)
+    void retirarAuto(const string& placa);
+    void mostrarEstado();     // Visualización gráfica
 };
 
-#endif // PARQUEADERO_H
+#endif
+

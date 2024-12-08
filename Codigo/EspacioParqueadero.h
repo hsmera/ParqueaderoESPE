@@ -21,12 +21,12 @@ struct Nodo {
 
 class EspacioParqueadero {
 public:
-    Nodo* crearListaCircular(int cantidad);   // Inicializa la lista circular con `cantidad` nodos
+    Nodo* crearListaCircular(int cantidad);   // Inicializa la lista circular con cantidad nodos
     Nodo* buscarEspacio(string id, Nodo* inicio); // Busca un espacio por ID
-    bool placaYaEstacionada(const string& placa, Nodo* inicio);
-    void ocuparEspacio(Nodo* espacio, const string& placa, Nodo* inicio);
+    void ocuparEspacio(Nodo* espacio, const string& placa); // Marca un espacio como ocupado
     void liberarEspacio(Nodo* espacio);      // Marca un espacio como libre
     string obtenerEstado(Nodo* inicio);      // Devuelve el estado de todos los espacios
 };
 
 #endif
+

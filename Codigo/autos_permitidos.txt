@@ -1,8 +1,1 @@
-444,ee,e,e,d,dc
-444,ff,de,ff,cc,dd
-123,y,y,y,y,y
-1,e,d,f,h,d
-2,er,t,y,e,d
-3,tt,t,t,ttt,tttt
-r,t,r,r,f,f
-12,we,ee,ew,e,wew
+1,w,w,w,w,w

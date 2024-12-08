@@ -93,6 +93,7 @@ bool AutosPermitidos::buscarAuto(const string& placa) const {
             return true;
         }
     }
+
     cout << "No se encontró un auto con la placa: " << placa << endl;
     return false;
 }

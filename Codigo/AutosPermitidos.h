@@ -12,7 +12,7 @@ using namespace std;
 class AutosPermitidos {
 private:
     vector<pair<Auto, Propietario>> autosPermitidos; 
-    const string archivo = "Autos_permitidos.txt";   
+    const string archivo = "autos_permitidos.txt";   
 
 const vector<pair<Auto, Propietario>>& getAutosPermitidos() const {
     return autosPermitidos;
