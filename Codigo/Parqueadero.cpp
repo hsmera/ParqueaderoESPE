@@ -115,7 +115,7 @@ bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
                 guardarEnArchivo();
                 return true;
             } else {
-                cout << "El espacio " << espacioId << " ya está ocupado." << endl;
+                cout << "El espacio " << espacioId << " ya esta ocupado." << endl;
                 return false;
             }
         }
@@ -138,6 +138,6 @@ bool Parqueadero::retirarAuto(const string& placa) {
         temp = temp->siguiente;
     } while (temp != head);
 
-    cout << "No se encontró un auto con la placa " << placa << "." << endl;
+    cout << "No se encontro un auto con la placa " << placa << "." << endl;
     return false;
 }

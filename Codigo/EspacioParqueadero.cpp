@@ -1,4 +1,5 @@
 #include "EspacioParqueadero.h"
+#include "Nodo.h"
 
 // Crear un nuevo nodo de espacio
 Nodo* EspacioParqueadero::crearEspacio(const string& id) {
@@ -13,7 +14,7 @@ void EspacioParqueadero::ocuparEspacio(Nodo* espacio, const string& placa) {
         espacio->horaIngreso = time(nullptr);
         cout << "Espacio " << espacio->id << " ocupado por el auto con placa " << placa << "." << endl;
     } else {
-        cout << "El espacio " << espacio->id << " ya está ocupado." << endl;
+        cout << "El espacio " << espacio->id << " ya esta ocupado." << endl;
     }
 }
 
@@ -25,7 +26,7 @@ void EspacioParqueadero::liberarEspacio(Nodo* espacio) {
         espacio->horaIngreso = 0;
         cout << "Espacio " << espacio->id << " liberado." << endl;
     } else {
-        cout << "El espacio " << espacio->id << " ya está libre." << endl;
+        cout << "El espacio " << espacio->id << " ya esta libre." << endl;
     }
 }
 

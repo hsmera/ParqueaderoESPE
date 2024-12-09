@@ -42,7 +42,7 @@ void Menu::ejecutarOpcion() {
             cout << "Ingrese la placa del auto: ";
             cin >> placa;
             if (!autosPermitidos->buscarAuto(placa)) {
-                cout << "El auto no está permitido. Regístrelo primero.\n";
+                cout << "El auto no esta permitido. Registrelo primero.\n";
                 break;
             }
             parqueadero->mostrarEstado();
@@ -98,7 +98,7 @@ void Menu::ejecutarOpcion() {
             cout << "Saliendo del programa...\n";
             exit(0);
         default:
-            cout << "Opción no válida.\n";
+            cout << "Opción no valida.\n";
             break;
     }
     system("pause");
@@ -139,7 +139,7 @@ void Menu::mostrarSubmenuAutosPermitidos() {
                 cout << "Ingrese la placa del auto: ";
                 cin >> placa;
                 if (!autosPermitidos->buscarAuto(placa)) {
-                    cout << "El auto con placa " << placa << " no está permitido.\n";
+                    cout << "El auto con placa " << placa << " no esta permitido.\n";
                 }
             }
             system("pause");

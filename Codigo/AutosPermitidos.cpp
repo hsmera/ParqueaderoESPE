@@ -1,9 +1,16 @@
 #include "AutosPermitidos.h"
+#include <iostream>
+#include <fstream>   // Para ifstream y ofstream
+#include <sstream>   // Para stringstream
+#include "Registro.h"
 
 // Constructor: carga los datos desde el archivo
 AutosPermitidos::AutosPermitidos() {
     cargarDesdeArchivo();
 }
+
+Registro::Registro(const Auto& autoPermitido, const Propietario& propietario)
+    : autoPermitido(autoPermitido), propietario(propietario) {}
 
 // Cargar autos permitidos desde el archivo
 void AutosPermitidos::cargarDesdeArchivo() {
@@ -55,7 +62,7 @@ void AutosPermitidos::guardarEnArchivo() {
 void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& propietario) {
     for (const auto& registro : registros) {
         if (registro.autoPermitido.placa == autoPermitido.placa) {
-            cout << "El auto con placa " << autoPermitido.placa << " ya está registrado." << endl;
+            cout << "El auto con placa " << autoPermitido.placa << " ya esta registrado." << endl;
             return;
         }
     }
@@ -85,7 +92,7 @@ void AutosPermitidos::eliminarAuto(const string& placa) {
             return;
         }
     }
-    cout << "No se encontró un auto con la placa " << placa << "." << endl;
+    cout << "No se encontro un auto con la placa " << placa << "." << endl;
 }
 
 // Mostrar todos los autos permitidos

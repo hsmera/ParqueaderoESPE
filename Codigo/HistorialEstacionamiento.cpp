@@ -73,7 +73,7 @@ void HistorialEstacionamiento::registrarSalida(const string& placa) {
             return;
         }
     }
-    cout << "No se encontró una entrada activa para la placa " << placa << "." << endl;
+    cout << "No se encontro una entrada activa para la placa " << placa << "." << endl;
 }
 
 // Mostrar todo el historial
@@ -101,9 +101,9 @@ string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
             resultado += "Placa: " + registro.placa 
                       + ", Espacio: " + registro.espacioId 
                       + ", Ingreso: " + registro.fechaHoraIngreso 
-                      + ", Salida: " + (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida) 
+                      + ", Salida: " + (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
                       + "\n";
         }
     }
-    return resultado.empty() ? "No se encontró historial para la placa " + placa : resultado;
+    return resultado.empty() ? "No se encontro historial para la placa " + placa : resultado;
 }
