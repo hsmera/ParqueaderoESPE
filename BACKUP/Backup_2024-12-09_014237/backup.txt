@@ -1,0 +1,16 @@
+@echo off
+:: Definir las rutas de los archivos y la carpeta de backup
+set source="C:\Users\DELL\Documents\KERLLY\tmp\Codigo"  :: Cambia esta ruta a la ubicación de tus archivos importantes
+set backupDir="C:\Users\DELL\Documents\KERLLY\PROYECTO\PROYECTO_ED204\BACKUP"
+set timestamp=%date%_%time%
+set timestamp=%timestamp:~10,4%%timestamp:~4,2%%timestamp:~7,2%_%timestamp:~0,2%%timestamp:~3,2%%timestamp:~6,2%
+
+:: Crear el directorio de backup si no existe
+if not exist %backupDir% mkdir %backupDir%
+
+:: Copiar los archivos al directorio de backup con un timestamp
+xcopy /E /I /H /Y %source% %backupDir%\Backup_%timestamp%
+
+:: Mensaje de éxito
+echo Backup completado exitosamente: %backupDir%\Backup_%timestamp%
+pause
