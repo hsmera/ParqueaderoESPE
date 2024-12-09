@@ -50,12 +50,48 @@ void AutosPermitidos::guardarEnArchivo() {
     for (const auto& registro : registros) {
         archivoSalida << registro.autoPermitido.placa << ","
                       << registro.autoPermitido.marca << ","
-                      << registro.autoPermitido.color << ","
-                      << registro.propietario.nombre << ","
-                      << registro.propietario.cedula << ","
-                      << registro.propietario.correo << "\n";
+                      << registro.autoPermitido.color << "\n";
     }
     archivoSalida.close();
+}
+
+void AutosPermitidos::guardarPropietarios() {
+    ofstream archivoPropietarios("Propietarios.txt", ios::trunc);
+    if (!archivoPropietarios.is_open()) {
+        cerr << "Error al abrir el archivo Propietarios.txt para guardar." << endl;
+        return;
+    }
+
+    for (const auto& registro : registros) {
+        archivoPropietarios << registro.propietario.nombre << ","
+                            << registro.propietario.cedula << ","
+                            << registro.propietario.correo << "\n";
+    }
+    archivoPropietarios.close();
+}
+
+void AutosPermitidos::mostrarPropietarios() {
+    ifstream archivoPropietarios("Propietarios.txt");
+    if (!archivoPropietarios.is_open()) {
+        cerr << "No se pudo abrir el archivo Propietarios.txt para leer." << endl;
+        return;
+    }
+
+    string linea;
+    while (getline(archivoPropietarios, linea)) {
+        stringstream ss(linea);
+        string nombre, cedula, correo;
+
+        getline(ss, nombre, ',');
+        getline(ss, cedula, ',');
+        getline(ss, correo, ',');
+        cout<< "Propietarios Registrados: "<<endl;
+        cout << "Nombre: " << nombre
+             << ", Cedula: " << cedula
+             << ", Correo: " << correo << endl;
+    }
+
+    archivoPropietarios.close();
 }
 
 // Agregar un nuevo auto permitido
@@ -69,7 +105,8 @@ void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& 
 
     registros.emplace_back(autoPermitido, propietario);
     guardarEnArchivo();
-    cout << "Auto agregado correctamente." << endl;
+    guardarPropietarios();
+    cout << "Auto y propietario agregados correctamente." << endl;
 }
 
 // Buscar un auto por placa
@@ -106,9 +143,24 @@ void AutosPermitidos::mostrarAutos() const {
     for (const auto& registro : registros) {
         cout << "Placa: " << registro.autoPermitido.placa
              << ", Marca: " << registro.autoPermitido.marca
-             << ", Color: " << registro.autoPermitido.color
-             << ", Propietario: " << registro.propietario.nombre
-             << ", Cedula: " << registro.propietario.cedula
-             << ", Correo: " << registro.propietario.correo << endl;
+             << ", Color: " << registro.autoPermitido.color<< endl;
+    }
+}
+void AutosPermitidos::mostrarAutoPorPlaca(const string& placa) const {
+    bool encontrado = false;
+
+    for (const auto& registro : registros) {
+        if (registro.autoPermitido.placa == placa) {
+            cout << "Auto encontrado:\n"
+                 << "Placa: " << registro.autoPermitido.placa
+                 << ", Marca: " << registro.autoPermitido.marca
+                 << ", Color: " << registro.autoPermitido.color<< endl;
+            encontrado = true;
+            break;  // Asume que solo hay un auto por placa
+        }
+    }
+
+    if (!encontrado) {
+        cout << "No se encontró un auto con la placa " << placa << "." << endl;
     }
 }

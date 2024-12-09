@@ -88,22 +88,67 @@ void HistorialEstacionamiento::mostrarHistorial() const {
         cout << "Placa: " << registro.placa 
              << ", Espacio: " << registro.espacioId 
              << ", Ingreso: " << registro.fechaHoraIngreso 
-             << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida)
+             << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida)
              << endl;
+    }
+}
+
+void HistorialEstacionamiento::mostrarHistorialPorFecha(const string& fecha) const {
+    bool encontrado = false;
+    cout << "Historial de estacionamiento para la fecha: " << fecha << "\n";
+    cout << "------------------------------------------------------\n";
+
+    for (const auto& registro : historial) {
+        if (registro.fechaHoraIngreso.substr(0, 10) == fecha) { // Compara la parte de la fecha (YYYY-MM-DD)
+            cout << "Placa: " << registro.placa 
+                 << ", Espacio: " << registro.espacioId 
+                 << ", Ingreso: " << registro.fechaHoraIngreso 
+                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida) 
+                 << "\n";
+            encontrado = true;
+        }
+    }
+
+    if (!encontrado) {
+        cout << "No se encontraron registros para la fecha: " << fecha << ".\n";
+    }
+}
+void HistorialEstacionamiento::mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const {
+    bool encontrado = false;
+    cout << "Historial de estacionamiento para la placa: " << placa 
+         << " y fecha: " << fecha << "\n";
+    cout << "------------------------------------------------------\n";
+
+    for (const auto& registro : historial) {
+        if (registro.placa == placa && registro.fechaHoraIngreso.substr(0, 10) == fecha) {
+            cout << "Placa: " << registro.placa 
+                 << ", Espacio: " << registro.espacioId 
+                 << ", Ingreso: " << registro.fechaHoraIngreso 
+                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida) 
+                 << "\n";
+            encontrado = true;
+        }
+    }
+
+    if (!encontrado) {
+        cout << "No se encontraron registros para la placa: " << placa 
+             << " en la fecha: " << fecha << ".\n";
     }
 }
 
 // Buscar historial por placa
 string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
     string resultado;
+    cout << "Buscando historial para la placa: " << placa << endl;
     for (const auto& registro : historial) {
         if (registro.placa == placa) {
             resultado += "Placa: " + registro.placa 
-                      + ", Espacio: " + registro.espacioId 
-                      + ", Ingreso: " + registro.fechaHoraIngreso 
-                      + ", Salida: " + (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
-                      + "\n";
+                       + ", Espacio: " + registro.espacioId 
+                       + ", Ingreso: " + registro.fechaHoraIngreso 
+                       + ", Salida: " + (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
+                       + "\n";
         }
     }
-    return resultado.empty() ? "No se encontro historial para la placa " + placa : resultado;
+    return resultado.empty() ? "No se encontró historial para la placa " + placa : resultado;
 }
+

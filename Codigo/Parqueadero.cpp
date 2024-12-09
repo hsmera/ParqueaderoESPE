@@ -108,11 +108,24 @@ void Parqueadero::mostrarEstado() const {
 // Estacionar un auto en un espacio específico
 bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
     Nodo* temp = head;
+
+    // Verificar si la placa ya está estacionada en algún espacio
+    do {
+        if (temp->placa == placa) {
+            cout << "El vehiculo con placa " << placa << " ya esta estacionado en el espacio " << temp->id << "." << endl;
+            return false;
+        }
+        temp = temp->siguiente;
+    } while (temp != head);
+
+    // Reiniciar la búsqueda para ubicar el espacio especificado
+    temp = head;
     do {
         if (temp->id == espacioId) {
             if (!temp->ocupado) {
                 manejadorEspacios.ocuparEspacio(temp, placa);
                 guardarEnArchivo();
+                cout << "El vehiculo con placa " << placa << " fue estacionado en el espacio " << espacioId << "." << endl;
                 return true;
             } else {
                 cout << "El espacio " << espacioId << " ya esta ocupado." << endl;

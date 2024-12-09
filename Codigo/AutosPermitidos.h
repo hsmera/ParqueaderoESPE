@@ -14,6 +14,7 @@ private:
 
     void cargarDesdeArchivo();
     void guardarEnArchivo();
+    void guardarPropietarios();
 
 public:
     AutosPermitidos();
@@ -21,6 +22,8 @@ public:
     bool buscarAuto(const std::string& placa) const;
     void eliminarAuto(const std::string& placa);
     void mostrarAutos() const;
+    void mostrarAutoPorPlaca(const string& placa) const;
+    void mostrarPropietarios();
 };
 
 #endif // AUTOSPERMITIDOS_H

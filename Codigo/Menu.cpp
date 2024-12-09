@@ -1,5 +1,8 @@
 #include "Menu.h"
-
+#include "Validaciones.h"
+#include <iostream>
+#include "HistorialEstacionamiento.h"
+using namespace std;
 // Constructor: Inicializa el menú con las opciones disponibles
 Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
     : parqueadero(p), historial(h), autosPermitidos(a), seleccionActual(0) {
@@ -10,6 +13,7 @@ Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
         "Registrar auto permitido",
         "Eliminar auto permitido",
         "Mostrar autos permitidos",
+        "Mostrar propietarios",
         "Mostrar historial de estacionamientos",
         "Salir"
     };
@@ -31,7 +35,7 @@ void Menu::mostrarMenu() {
 }
 
 // Ejecutar la opción seleccionada
-void Menu::ejecutarOpcion() {
+void Menu::ejecutarOpcion() {          
     system("cls");
     switch (seleccionActual) {
         case 0:
@@ -39,15 +43,17 @@ void Menu::ejecutarOpcion() {
             break;
         case 1: {
             string placa, espacioId;
-            cout << "Ingrese la placa del auto: ";
-            cin >> placa;
+            Validaciones<string> validador;
+            Validaciones<int> ingresar_Entero;
+            placa = validador.ingresarPlaca("Ingresa la placa del auto a estacionar: ");
+            cout <<endl;
             if (!autosPermitidos->buscarAuto(placa)) {
                 cout << "El auto no esta permitido. Registrelo primero.\n";
                 break;
             }
             parqueadero->mostrarEstado();
-            cout << "\nIngrese el ID del espacio a ocupar: ";
-            cin >> espacioId;
+            cout<<"Ingrese el id del espacio a estacionarse: ";
+            cin>>espacioId;
             if (parqueadero->estacionarAuto(placa, espacioId)) {
                 historial->registrarEntrada(placa, espacioId);
             }
@@ -55,8 +61,8 @@ void Menu::ejecutarOpcion() {
         }
         case 2: {
             string placa;
-            cout << "Ingrese la placa del auto: ";
-            cin >> placa;
+            Validaciones<string> validador;
+            placa = validador.ingresarPlaca("Ingrese la placa del auto a retirar: ");
             if (parqueadero->retirarAuto(placa)) {
                 historial->registrarSalida(placa);
             }
@@ -64,18 +70,19 @@ void Menu::ejecutarOpcion() {
         }
         case 3: {
             string placa, marca, color, nombre, cedula, correo;
-            cout << "Ingrese la placa del auto: ";
-            cin >> placa;
-            cout << "Ingrese la marca del auto: ";
-            cin >> marca;
-            cout << "Ingrese el color del auto: ";
-            cin >> color;
-            cout << "Ingrese el nombre del propietario: ";
-            cin >> nombre;
-            cout << "Ingrese la cedula del propietario: ";
-            cin >> cedula;
-            cout << "Ingrese el correo del propietario: ";
-            cin >> correo;
+            Validaciones<string> validador;
+            placa = validador.ingresarPlaca("Ingrese la placa del auto: ");
+            cout <<endl;
+            marca = validador.ingresar("Ingrese la marca del auto: ", "string");
+            cout<<endl;
+            color = validador.ingresar("Ingrese el color: ","string");
+            cout<<endl;
+            nombre = validador.ingresar("Ingrese el nombre del propietario: ","string");
+            cout<<endl;
+            cedula = validador.ingresarCedula("Ingrese la cedula del propietario: ");
+            cout<<endl;
+            correo = validador.ingresarCorreo("Ingrese el correo del propietario: ");
+            cout<<endl;
             Auto autoObj(placa, marca, color);
             Propietario propietario(nombre, cedula, correo);
             autosPermitidos->agregarAuto(autoObj, propietario);
@@ -83,8 +90,9 @@ void Menu::ejecutarOpcion() {
         }
         case 4: {
             string placa;
-            cout << "Ingrese la placa del auto a eliminar: ";
-            cin >> placa;
+            Validaciones<string> validador;
+            placa = validador.ingresarPlaca("Ingrese la placa del auto a eliminar: ");
+            cout<<endl;
             autosPermitidos->eliminarAuto(placa);
             break;
         }
@@ -92,13 +100,16 @@ void Menu::ejecutarOpcion() {
             mostrarSubmenuAutosPermitidos();
             break;
         case 6:
-            mostrarSubmenuHistorial();
+            autosPermitidos->mostrarPropietarios();
             break;
         case 7:
+            mostrarSubmenuHistorial();
+            break;
+        case 8:
             cout << "Saliendo del programa...\n";
             exit(0);
         default:
-            cout << "Opción no valida.\n";
+            cout << "Opcion no valida.\n";
             break;
     }
     system("pause");
@@ -108,7 +119,8 @@ void Menu::ejecutarOpcion() {
 void Menu::mostrarSubmenuAutosPermitidos() {
     vector<string> opcionesAutos = {
         "Mostrar todos los autos permitidos",
-        "Buscar auto por placa"
+        "Buscar auto por placa",
+        "Regresar al menu principal"
     };
     int seleccionSubmenu = 0;
 
@@ -132,18 +144,26 @@ void Menu::mostrarSubmenuAutosPermitidos() {
             seleccionSubmenu = (seleccionSubmenu + 1) % opcionesAutos.size();
         } else if (tecla == '\r') { // Enter
             system("cls");
-            if (seleccionSubmenu == 0) {
+            if (seleccionSubmenu == 0) { 
+                // Opción: Mostrar todos los autos permitidos
                 autosPermitidos->mostrarAutos();
-            } else if (seleccionSubmenu == 1) {
+            } else if (seleccionSubmenu == 1) { 
+                // Opción: Buscar auto por placa
                 string placa;
-                cout << "Ingrese la placa del auto: ";
-                cin >> placa;
-                if (!autosPermitidos->buscarAuto(placa)) {
-                    cout << "El auto con placa " << placa << " no esta permitido.\n";
+                Validaciones<string> validador;
+                placa = validador.ingresarPlaca("Ingrese la placa del auto: ");
+                cout << endl;
+
+                if (autosPermitidos->buscarAuto(placa)) {
+                    autosPermitidos->mostrarAutoPorPlaca(placa); // Mostrar detalles del auto
+                } else {
+                    cout << "El auto con placa " << placa << " no está permitido.\n";
                 }
+            } else if (seleccionSubmenu == 2) { 
+                // Opción: Regresar al menú principal
+                break;
             }
             system("pause");
-            break;
         }
     }
 }
@@ -151,15 +171,16 @@ void Menu::mostrarSubmenuAutosPermitidos() {
 // Mostrar submenú del historial
 void Menu::mostrarSubmenuHistorial() {
     vector<string> opcionesHistorial = {
-        "Mostrar historial completo",
-        "Mostrar historial por placa"
+        "Mostrar historial por fecha",
+        "Mostrar historial por fecha y placa",
+        "Regresar al menu principal"
     };
     int seleccionSubmenu = 0;
 
     while (true) {
         system("cls");
-        cout << "Opciones de Historial de Estacionamiento\n";
-        cout << "----------------------------------------\n";
+        cout << "Opciones de Historial\n";
+        cout << "-----------------------\n";
 
         for (int i = 0; i < opcionesHistorial.size(); i++) {
             if (i == seleccionSubmenu) {
@@ -177,15 +198,24 @@ void Menu::mostrarSubmenuHistorial() {
         } else if (tecla == '\r') { // Enter
             system("cls");
             if (seleccionSubmenu == 0) {
-                historial->mostrarHistorial();
+                string fecha;
+                Validaciones<string> validador;
+                fecha = validador.ingresarFecha("Ingrese la fecha (YYYY-MM-DD): ");
+                cout<<endl;
+                historial->mostrarHistorialPorFecha(fecha);
+                cout<<endl;
             } else if (seleccionSubmenu == 1) {
-                string placa;
-                cout << "Ingrese la placa del auto: ";
-                cin >> placa;
-                cout << historial->buscarHistorial(placa) << endl;
+                string fecha, placa;
+                Validaciones<string> validador;
+                fecha = validador.ingresarFecha("Ingrese la fecha (YYYY-MM-DD): ");
+                cout<<endl;
+                placa = validador.ingresarPlaca("Ingrese la placa: ");
+                cout<<endl;
+                historial->mostrarHistorialPorFechaYPlaca(fecha, placa);
+            } else if (seleccionSubmenu == 2) {
+                break; // Regresar al menú principal
             }
             system("pause");
-            break;
         }
     }
 }
