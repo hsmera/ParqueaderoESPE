@@ -1,0 +1,4 @@
+Placa: PBB1997, Espacio: 05, Hora de salida: 18:10:35
+Placa: PBB1997, Espacio: 09, Hora de salida: 18:11:1
+Placa: PBB1997, Espacio: 09, Hora de salida: 18:20:25
+Placa: PBB1997, Espacio: 11, Hora de salida: 18:20:59
