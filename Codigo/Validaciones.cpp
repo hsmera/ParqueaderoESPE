@@ -14,6 +14,7 @@
 #include <conio.h>
 #include <cstdlib>
 #include <regex>
+#include <limits>
 
 
 using namespace std;
@@ -359,4 +360,25 @@ std::string Validaciones<T>::ingresarEspacioId(const char* msj) {
     }
 
     return espacioId;
+}
+
+// Definición de la función ingresarHora en el mismo archivo
+template <typename T>
+string Validaciones<T>::ingresarHora(const string& mensaje) {
+    regex formatoHora("^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$");
+    string hora;
+    while (true) {
+        cout << mensaje;
+        cin >> hora;
+        
+        // Limpiar el buffer en caso de que haya caracteres extraños
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        
+        if (regex_match(hora, formatoHora)) {
+            break;
+        } else {
+            cout << "Hora inválida. Por favor, ingrese una hora en el formato HH:MM:SS.\n";
+        }
+    }
+    return hora;
 }

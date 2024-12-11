@@ -49,6 +49,8 @@ public:
     string buscarHistorial(const string& placa) const;
     void mostrarHistorialPorFecha(const string& fecha) const;
     void mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const;
+    void mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const;
+
 };
 
 #endif // HISTORIALESTACIONAMIENTO_H

@@ -186,6 +186,7 @@ void Menu::mostrarSubmenuHistorial() {
     vector<string> opcionesHistorial = {
         "Mostrar historial por fecha",
         "Mostrar historial por fecha y placa",
+        "Mostrar historial por rango de hora",
         "Regresar al menu principal"
     };
     int seleccionSubmenu = 0;
@@ -214,24 +215,34 @@ void Menu::mostrarSubmenuHistorial() {
                 string fecha;
                 Validaciones<string> validador;
                 fecha = validador.ingresarFecha("Ingrese la fecha (YYYY-MM-DD): ");
-                cout<<endl;
+                cout << endl;
                 historial->mostrarHistorialPorFecha(fecha);
-                cout<<endl;
+                cout << endl;
             } else if (seleccionSubmenu == 1) {
                 string fecha, placa;
                 Validaciones<string> validador;
                 fecha = validador.ingresarFecha("Ingrese la fecha (YYYY-MM-DD): ");
-                cout<<endl;
-                placa = validador.ingresarPlaca("Ingrese la placa(sin guiones): ");
-                cout<<endl;
+                cout << endl;
+                placa = validador.ingresarPlaca("Ingrese la placa (sin guiones): ");
+                cout << endl;
                 historial->mostrarHistorialPorFechaYPlaca(fecha, placa);
             } else if (seleccionSubmenu == 2) {
+                string horaInicio, horaFin;
+                Validaciones<string> validador;
+                horaInicio = validador.ingresarHora("Ingrese la hora de inicio (HH:MM:SS): ");
+                cout << endl;
+                horaFin = validador.ingresarHora("Ingrese la hora de fin (HH:MM:SS): ");
+                cout << endl;
+                historial->mostrarHistorialPorRangoHoras(horaInicio, horaFin);
+                cout << endl;
+            } else if (seleccionSubmenu == 3) {
                 break; // Regresar al menú principal
             }
             system("pause");
         }
     }
 }
+
 
 // Iniciar el menú interactivo
 void Menu::iniciar() {

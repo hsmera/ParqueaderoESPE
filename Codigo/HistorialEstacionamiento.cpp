@@ -9,6 +9,11 @@
  **************************************************************************************/
 
 #include "HistorialEstacionamiento.h"
+#include <algorithm> // Para std::copy_if
+#include <vector>
+#include <string>
+#include <iostream>
+
 
 // Constructor: carga el historial desde el archivo
 HistorialEstacionamiento::HistorialEstacionamiento() {
@@ -161,4 +166,35 @@ string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
     }
     return resultado.empty() ? "No se encontro historial para la placa " + placa : resultado;
 }
+
+void HistorialEstacionamiento::mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const {
+    vector<RegistroHistorial> resultados;
+
+    // Filtrar registros por rango de hora
+    copy_if(historial.begin(), historial.end(), back_inserter(resultados), [&](const RegistroHistorial& registro) {
+        // Extraer la hora de ingreso y salida
+        string horaIngreso = registro.fechaHoraIngreso.substr(11, 8); // Extraer solo la hora
+        string horaSalida = registro.fechaHoraSalida.empty() ? "" : registro.fechaHoraSalida.substr(11, 8);   // Extraer solo la hora, con control de vacío
+
+        // Compara las horas de ingreso y salida con el rango
+        return (horaIngreso >= horaInicio && horaIngreso <= horaFin) ||
+               (!horaSalida.empty() && horaSalida >= horaInicio && horaSalida <= horaFin); // Evitar comparar horaSalida vacía
+    });
+
+    if (resultados.empty()) {
+        cout << "No se encontraron registros en el rango de tiempo especificado." << endl;
+        return;
+    }
+
+    for (const auto& registro : resultados) {
+        cout << "Placa: " << registro.placa
+             << ", Espacio: " << registro.espacioId
+             << ", Ingreso: " << registro.fechaHoraIngreso
+             << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida)
+             << endl;
+    }
+}
+
+
+
 

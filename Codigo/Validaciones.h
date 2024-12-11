@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <regex>
 #include <set>
+#include <limits>
 
 using namespace std;
 
@@ -31,6 +32,7 @@ public:
     std::string ingresarCedula(char *msj);
     std::string ingresarCorreo(char *msj);
     std::string ingresarEspacioId(const char *msj);
+    static string ingresarHora(const string& mensaje);
 
 
 private:
@@ -379,5 +381,26 @@ std::string Validaciones<T>::ingresarEspacioId(const char* msj) {
     }
 
     return espacioId;
+}
+
+// Definición de la función ingresarHora en el mismo archivo
+template <typename T>
+string Validaciones<T>::ingresarHora(const string& mensaje) {
+    regex formatoHora("^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$");
+    string hora;
+    while (true) {
+        cout << mensaje;
+        cin >> hora;
+        
+        // Limpiar el buffer en caso de que haya caracteres extraños
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        
+        if (regex_match(hora, formatoHora)) {
+            break;
+        } else {
+            cout << "Hora inválida. Por favor, ingrese una hora en el formato HH:MM:SS.\n";
+        }
+    }
+    return hora;
 }
 #endif
