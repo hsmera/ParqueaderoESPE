@@ -1,3 +1,13 @@
+/***************************************************************************************
+ *            UNIVERSIDAD DE LAS FUERZAS ARMADAS ESPE                                  *
+ * Proposito:                      Proyecto Primer Parcial                             *
+ * Autor:                          Kerlly Chiriboga,Heidy Mera                         *
+ * Fecha de creacion:              06/12/2024                                          *
+ * Fecha de modificacion:          06/12/2024                                          *
+ * Materia:                        Estructura de datos                                 *
+ * NRC :                           1978                                                *
+ **************************************************************************************/
+
 #include "HistorialEstacionamiento.h"
 
 // Constructor: carga el historial desde el archivo
@@ -103,7 +113,7 @@ void HistorialEstacionamiento::mostrarHistorialPorFecha(const string& fecha) con
             cout << "Placa: " << registro.placa 
                  << ", Espacio: " << registro.espacioId 
                  << ", Ingreso: " << registro.fechaHoraIngreso 
-                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida) 
+                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
                  << "\n";
             encontrado = true;
         }
@@ -124,7 +134,7 @@ void HistorialEstacionamiento::mostrarHistorialPorFechaYPlaca(const string& fech
             cout << "Placa: " << registro.placa 
                  << ", Espacio: " << registro.espacioId 
                  << ", Ingreso: " << registro.fechaHoraIngreso 
-                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aún en el parqueadero" : registro.fechaHoraSalida) 
+                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
                  << "\n";
             encontrado = true;
         }
@@ -149,6 +159,6 @@ string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
                        + "\n";
         }
     }
-    return resultado.empty() ? "No se encontró historial para la placa " + placa : resultado;
+    return resultado.empty() ? "No se encontro historial para la placa " + placa : resultado;
 }
 

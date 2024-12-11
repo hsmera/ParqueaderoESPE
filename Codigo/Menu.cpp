@@ -104,6 +104,9 @@ void Menu::ejecutarOpcion() {
             placa = validador.ingresarPlaca("Ingrese la placa del auto a eliminar(sin guiones): ");
             cout<<endl;
             autosPermitidos->eliminarAuto(placa);
+            if (parqueadero->retirarAuto(placa)){
+                historial->registrarSalida(placa);
+            }
             break;
         }
         case 5:

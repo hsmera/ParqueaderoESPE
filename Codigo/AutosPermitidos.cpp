@@ -1,8 +1,20 @@
+/***************************************************************************************
+ *            UNIVERSIDAD DE LAS FUERZAS ARMADAS ESPE                                  *
+ * Proposito:                      Proyecto Primer Parcial                             *
+ * Autor:                          Kerlly Chiriboga,Heidy Mera                         *
+ * Fecha de creacion:              06/12/2024                                          *
+ * Fecha de modificacion:          06/12/2024                                          *
+ * Materia:                        Estructura de datos                                 *
+ * NRC :                           1978                                                *
+ **************************************************************************************/
+
 #include "AutosPermitidos.h"
 #include <iostream>
 #include <fstream>   // Para ifstream y ofstream
 #include <sstream>   // Para stringstream
 #include "Registro.h"
+#include "Parqueadero.h"
+#include <algorithm>
 
 // Constructor: carga los datos desde el archivo
 AutosPermitidos::AutosPermitidos() {
@@ -63,9 +75,15 @@ void AutosPermitidos::guardarPropietarios() {
     }
 
     for (const auto& registro : registros) {
-        archivoPropietarios << registro.propietario.nombre << ","
-                            << registro.propietario.cedula << ","
-                            << registro.propietario.correo << "\n";
+        if (!registro.propietario.nombre.empty() &&
+            !registro.propietario.cedula.empty() &&
+            !registro.propietario.correo.empty()) {
+            archivoPropietarios << registro.propietario.nombre << ","
+                                << registro.propietario.cedula << ","
+                                << registro.propietario.correo << "\n";
+        } else {
+            //cerr << "Se encontró un propietario con datos incompletos. No se guardará." << endl;
+        }
     }
     archivoPropietarios.close();
 }
@@ -77,6 +95,7 @@ void AutosPermitidos::mostrarPropietarios() {
         return;
     }
 
+    cout << "Propietarios Registrados:\n"; // Muestra el título solo una vez
     string linea;
     while (getline(archivoPropietarios, linea)) {
         stringstream ss(linea);
@@ -85,10 +104,15 @@ void AutosPermitidos::mostrarPropietarios() {
         getline(ss, nombre, ',');
         getline(ss, cedula, ',');
         getline(ss, correo, ',');
-        cout<< "Propietarios Registrados: "<<endl;
-        cout << "Nombre: " << nombre
-             << ", Cedula: " << cedula
-             << ", Correo: " << correo << endl;
+
+        // Verifica si los datos están completos antes de mostrarlos
+        if (!nombre.empty() && !cedula.empty() && !correo.empty()) {
+            cout << "Nombre: " << nombre
+                 << ", Cedula: " << cedula
+                 << ", Correo: " << correo << endl;
+        } else {
+            cerr << "Se encontro un registro inválido en Propietarios.txt: " << linea << endl;
+        }
     }
 
     archivoPropietarios.close();

@@ -149,7 +149,6 @@ bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
     return false;
 }
 
-// Retirar un auto por su placa
 bool Parqueadero::retirarAuto(const string& placa) {
     Nodo* temp = head;
     do {
