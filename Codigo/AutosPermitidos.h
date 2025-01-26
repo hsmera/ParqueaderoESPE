@@ -14,12 +14,12 @@
 #include "Auto.h"
 #include "Propietario.h"
 #include "Registro.h"  
-#include <vector>
+#include <list>
 #include <string>
 
 class AutosPermitidos {
 private:
-    std::vector<Registro> registros;  // Vector de objetos Registro
+    std::list<Registro> registros;  // Vector de objetos Registro
     const std::string archivo = "autos_permitidos.txt";
 
     void cargarDesdeArchivo();
@@ -34,6 +34,7 @@ public:
     void mostrarAutos() const;
     void mostrarAutoPorPlaca(const string& placa) const;
     void mostrarPropietarios();
+    void ordenarAutos();
 };
 
 #endif // AUTOSPERMITIDOS_H

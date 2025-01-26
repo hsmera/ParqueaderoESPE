@@ -12,7 +12,7 @@
 #define HISTORIALESTACIONAMIENTO_H
 
 #include <string>
-#include <vector>
+#include <list>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -33,7 +33,7 @@ public:
 
 class HistorialEstacionamiento {
 private:
-    vector<RegistroHistorial> historial;
+    list<RegistroHistorial> historial;
     const string archivoHistorial = "historial_estacionamiento.txt";
 
     string obtenerFechaHoraActual() const;
@@ -53,4 +53,4 @@ public:
 
 };
 
-#endif // HISTORIALESTACIONAMIENTO_H
+#endif 

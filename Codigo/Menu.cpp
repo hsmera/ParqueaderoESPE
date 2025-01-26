@@ -23,6 +23,7 @@ Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
         "Registrar auto permitido",
         "Eliminar auto permitido",
         "Mostrar autos permitidos",
+        "Ordenar autos permitidos",
         "Mostrar propietarios",
         "Mostrar historial de estacionamientos",
         "Salir"
@@ -112,13 +113,16 @@ void Menu::ejecutarOpcion() {
         case 5:
             mostrarSubmenuAutosPermitidos();
             break;
-        case 6:
-            autosPermitidos->mostrarPropietarios();
+        case 6: // Agregar caso para ordenar los autos permitidos
+            ordenarAutosPermitidos();
             break;
         case 7:
-            mostrarSubmenuHistorial();
+            autosPermitidos->mostrarPropietarios();
             break;
         case 8:
+            mostrarSubmenuHistorial();
+            break;
+        case 9:
             cout << "Saliendo del programa...\n";
             exit(0);
         default:
@@ -284,3 +288,10 @@ void Menu::mostrarGuiaRapida() {
     std::cout << "Presiona cualquier tecla para regresar al menu principal...\n";
     _getch(); // Esperar a que el usuario presione una tecla
 }
+
+void Menu::ordenarAutosPermitidos() {
+    // Llamamos al método de ordenar de la clase AutosPermitidos
+    autosPermitidos->ordenarAutos();  // Suponiendo que 'ordenarAutos' está implementado en AutosPermitidos
+    cout << "Autos permitidos ordenados correctamente." << endl;
+}
+

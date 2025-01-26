@@ -30,6 +30,7 @@ private:
 
     void mostrarSubmenuAutosPermitidos();
     void mostrarSubmenuHistorial();
+    void ordenarAutosPermitidos();
 
 public:
     Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);

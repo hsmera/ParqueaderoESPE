@@ -15,6 +15,8 @@
 #include "Registro.h"
 #include "Parqueadero.h"
 #include <algorithm>
+#include <list>
+
 
 // Constructor: carga los datos desde el archivo
 AutosPermitidos::AutosPermitidos() {
@@ -185,6 +187,27 @@ void AutosPermitidos::mostrarAutoPorPlaca(const string& placa) const {
     }
 
     if (!encontrado) {
-        cout << "No se encontró un auto con la placa " << placa << "." << endl;
+        cout << "No se encontro un auto con la placa " << placa << "." << endl;
     }
+}
+
+void AutosPermitidos::ordenarAutos() {
+    // Si la lista tiene 0 o 1 elementos no es necesario ordenar
+    if (registros.size() <= 1) return;
+
+    // Usamos un algoritmo de ordenación por inserción en la lista
+    for (auto it = std::next(registros.begin()); it != registros.end(); ++it) {
+        auto current = it;
+        auto prev = std::prev(current);
+
+        // Comparar los elementos de la lista (por ejemplo, por la placa del auto)
+        while (current != registros.begin() && current->autoPermitido.placa < prev->autoPermitido.placa) {
+            std::swap(*current, *prev); // Intercambiar los elementos
+            --current;
+            --prev;
+        }
+    }
+
+    // Guardar los autos ordenados en el archivo
+    guardarEnArchivo();
 }
