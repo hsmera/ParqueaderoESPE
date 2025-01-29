@@ -11,6 +11,7 @@
 #ifndef HISTORIALESTACIONAMIENTO_H
 #define HISTORIALESTACIONAMIENTO_H
 
+#include "ArbolRN.h"
 #include <string>
 #include <list>
 #include <fstream>
@@ -19,29 +20,17 @@
 #include <ctime>
 using namespace std;
 
-class RegistroHistorial {
-public:
-    string placa;
-    string espacioId;
-    string fechaHoraIngreso;
-    string fechaHoraSalida;
-
-    RegistroHistorial(const string& placa, const string& espacioId, 
-                      const string& fechaHoraIngreso, const string& fechaHoraSalida = "")
-        : placa(placa), espacioId(espacioId), fechaHoraIngreso(fechaHoraIngreso), fechaHoraSalida(fechaHoraSalida) {}
-};
-
 class HistorialEstacionamiento {
 private:
-    list<RegistroHistorial> historial;
+    ArbolRN historial;                 // Árbol Rojo-Negro para gestionar el historial
     const string archivoHistorial = "historial_estacionamiento.txt";
 
-    string obtenerFechaHoraActual() const;
-    void cargarDesdeArchivo();
-    void guardarEnArchivo();
+    string obtenerFechaHoraActual() const;  // Método para obtener la fecha y hora actual
+    void cargarDesdeArchivo();              // Carga los datos del archivo al árbol
+    void guardarEnArchivo();                // Guarda los datos del árbol al archivo
 
 public:
-    HistorialEstacionamiento();
+    HistorialEstacionamiento();             // Constructor
 
     void registrarEntrada(const string& placa, const string& espacioId);
     void registrarSalida(const string& placa);
@@ -50,7 +39,9 @@ public:
     void mostrarHistorialPorFecha(const string& fecha) const;
     void mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const;
     void mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const;
+    void mostrarPrimerIngresoPorFecha(const string& fecha) const;
+    void mostrarAutosPorRangoFechas(const string& fechaInicio, const string& fechaFin) const;
 
 };
 
-#endif 
+#endif

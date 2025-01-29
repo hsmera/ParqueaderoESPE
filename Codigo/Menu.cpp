@@ -12,6 +12,17 @@
 #include "Validaciones.h"
 #include <iostream>
 #include "HistorialEstacionamiento.h"
+#include "Ordenamientos.h"
+#include <conio.h>
+#include <algorithm>
+#include <functional>
+#include <list>
+#include <vector>
+#include <string>
+#include <fstream>
+#include "BusquedaBinaria.h"
+
+
 using namespace std;
 // Constructor: Inicializa el menú con las opciones disponibles
 Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
@@ -23,6 +34,7 @@ Menu::Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a)
         "Registrar auto permitido",
         "Eliminar auto permitido",
         "Mostrar autos permitidos",
+        "Opciones de Busqueda",
         "Ordenar autos permitidos",
         "Mostrar propietarios",
         "Mostrar historial de estacionamientos",
@@ -111,18 +123,21 @@ void Menu::ejecutarOpcion() {
             break;
         }
         case 5:
-            mostrarSubmenuAutosPermitidos();
+            autosPermitidos->mostrarAutos();
             break;
-        case 6: // Agregar caso para ordenar los autos permitidos
-            ordenarAutosPermitidos();
+        case 6:
+            submenuBusquedas();
             break;
-        case 7:
-            autosPermitidos->mostrarPropietarios();
+        case 7: // Agregar caso para ordenar los autos permitidos
+            mostrarMenuOrdenamiento(autosPermitidos->getRegistros());
             break;
         case 8:
-            mostrarSubmenuHistorial();
+            autosPermitidos->mostrarPropietarios();
             break;
         case 9:
+            mostrarSubmenuHistorial();
+            break;
+        case 10:
             cout << "Saliendo del programa...\n";
             exit(0);
         default:
@@ -133,53 +148,104 @@ void Menu::ejecutarOpcion() {
 }
 
 // Mostrar submenú de autos permitidos
-void Menu::mostrarSubmenuAutosPermitidos() {
+void Menu::submenuBusquedas()
+{
     vector<string> opcionesAutos = {
-        "Mostrar todos los autos permitidos",
         "Buscar auto por placa",
-        "Regresar al menu principal"
-    };
+        "Buscar autos permitidos por prefijo de placa",  // Opción nueva
+        "Buscar el primer ingreso por fecha especifica", // Opción nueva
+        "Buscar autos por rango de fechas",  // Opción nueva
+        "Regresar al menu principal"};
+
     int seleccionSubmenu = 0;
 
-    while (true) {
+    while (true)
+    {
         system("cls");
-        cout << "Opciones de Autos Permitidos\n";
+        cout << "   Opciones de Busqueda      \n";
         cout << "-----------------------------\n";
 
-        for (int i = 0; i < opcionesAutos.size(); i++) {
-            if (i == seleccionSubmenu) {
+        for (int i = 0; i < opcionesAutos.size(); i++)
+        {
+            if (i == seleccionSubmenu)
+            {
                 cout << " > " << opcionesAutos[i] << " <\n";
-            } else {
+            }
+            else
+            {
                 cout << "   " << opcionesAutos[i] << "\n";
             }
         }
 
         char tecla = _getch();
-        if (tecla == 72) { // Flecha arriba
+        if (tecla == 72)
+        { // Flecha arriba
             seleccionSubmenu = (seleccionSubmenu - 1 + opcionesAutos.size()) % opcionesAutos.size();
-        } else if (tecla == 80) { // Flecha abajo
+        }
+        else if (tecla == 80)
+        { // Flecha abajo
             seleccionSubmenu = (seleccionSubmenu + 1) % opcionesAutos.size();
-        } else if (tecla == '\r') { // Enter
+        }
+        else if (tecla == '\r')
+        { // Enter
             system("cls");
-            if (seleccionSubmenu == 0) { 
-                // Opción: Mostrar todos los autos permitidos
-                autosPermitidos->mostrarAutos();
-            } else if (seleccionSubmenu == 1) { 
+            if (seleccionSubmenu == 0)
+            {
                 // Opción: Buscar auto por placa
                 string placa;
                 Validaciones<string> validador;
                 placa = validador.ingresarPlaca("Ingrese la placa del auto(sin guiones): ");
                 cout << endl;
 
-                if (autosPermitidos->buscarAuto(placa)) {
+                if (autosPermitidos->buscarAuto(placa))
+                {
                     autosPermitidos->mostrarAutoPorPlaca(placa); // Mostrar detalles del auto
-                } else {
-                    cout << "El auto con placa " << placa << " no esta permitido.\n";
                 }
-            } else if (seleccionSubmenu == 2) { 
+                else
+                {
+                    cout << "El auto con placa " << placa << " no está permitido.\n";
+                }
+            }
+            else if (seleccionSubmenu == 1)
+            {
+                // Opción: Buscar autos por prefijo de placa
+                string prefijo;
+                Validaciones<string> validador;
+                prefijo = validador.ingresarPrefijo("Ingrese el prefijo de la placa(Ejem: XYZ): ");
+                cout<<endl;
+                // Usar la clase BusquedaBinaria para encontrar los autos con el prefijo
+                BusquedaBinaria::mostrarRegistros(autosPermitidos->getRegistros(), prefijo);
+            }
+            else if (seleccionSubmenu == 2)
+            {
+                // Opción: Buscar el primer ingreso por fecha específica
+                string fecha;
+                Validaciones<string> validador;
+                fecha = validador.ingresarFecha("Ingrese la fecha de busqueda (YYYY-MM-DD): ");
+                cout << endl;
+
+                // Llamar al método de HistorialEstacionamiento para mostrar el primer ingreso
+                historial->mostrarPrimerIngresoPorFecha(fecha);
+            }
+            else if (seleccionSubmenu == 3)
+            {
+                // Opción: Buscar autos por rango de fechas
+                string fechaInicio, fechaFin;
+                Validaciones<string> validador;
+                fechaInicio = validador.ingresarFecha("Ingrese la fecha de inicio (YYYY-MM-DD): ");
+                cout <<endl;
+                fechaFin = validador.ingresarFecha("Ingrese la fecha de fin (YYYY-MM-DD): ");
+                cout << endl;
+
+                // Llamar al método de HistorialEstacionamiento para mostrar autos en el rango de fechas
+                historial->mostrarAutosPorRangoFechas(fechaInicio, fechaFin);
+            }
+            else if (seleccionSubmenu == 4)
+            {
                 // Opción: Regresar al menú principal
                 break;
             }
+
             system("pause");
         }
     }
@@ -247,6 +313,101 @@ void Menu::mostrarSubmenuHistorial() {
     }
 }
 
+void Menu::mostrarMenuOrdenamiento(std::list<Registro> &registros) // Modificado
+{
+    std::vector<std::string> opcionesOrdenamiento = {
+        "Shell Sort",
+        "Bubble Sort",
+        "Quick Sort",
+        "Radix Sort",
+        "Bucket Sort",
+        "Heap Sort",
+        "Salir"};
+    int seleccionMenu = 0;
+
+    while (true)
+    {
+        system("cls");
+        std::cout << "Opciones de Ordenamiento\n";
+        std::cout << "--------------------------\n";
+
+        for (int i = 0; i < opcionesOrdenamiento.size(); i++)
+        {
+            if (i == seleccionMenu)
+            {
+                std::cout << " > " << opcionesOrdenamiento[i] << " <\n";
+            }
+            else
+            {
+                std::cout << "   " << opcionesOrdenamiento[i] << "\n";
+            }
+        }
+
+        char tecla = _getch();
+        if (tecla == 72)
+        { // Flecha arriba
+            seleccionMenu = (seleccionMenu - 1 + opcionesOrdenamiento.size()) % opcionesOrdenamiento.size();
+        }
+        else if (tecla == 80)
+        { // Flecha abajo
+            seleccionMenu = (seleccionMenu + 1) % opcionesOrdenamiento.size();
+        }
+        else if (tecla == '\r')
+        { // Enter
+            system("cls");
+            if (seleccionMenu == 0)
+            {
+                std::cout << "Ejecutando Shell Sort...\n";
+                // Usando un comparador (por ejemplo, por placa en orden ascendente)
+                Ordenamientos::shellSort(registros, [](const Auto &a, const Auto &b)
+                                         { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_ShellSort.txt");
+            }
+            else if (seleccionMenu == 1)
+            {
+                std::cout << "Ejecutando Bubble Sort...\n";
+                Ordenamientos::bubbleSort(registros, [](const Auto &a, const Auto &b)
+                                          { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_BubbleSort.txt");
+            }
+            else if (seleccionMenu == 2)
+            {
+                std::cout << "Ejecutando Quick Sort...\n";
+                // Usando un comparador (por ejemplo, por placa en orden ascendente)
+                Ordenamientos::quickSort(registros, [](const Auto &a, const Auto &b)
+                                         { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_QuickSort.txt");
+            }
+            else if (seleccionMenu == 3)
+            {
+                std::cout << "Ejecutando Radix Sort...\n";
+                Ordenamientos::radixSort(registros, [](const Auto &a, const Auto &b)
+                                         { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_RadixSort.txt");
+            }
+            else if (seleccionMenu == 4)
+            {
+                std::cout << "Ejecutando Bucket Sort...\n";
+                Ordenamientos::bucketSort(registros, [](const Auto &a, const Auto &b)
+                                          { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_BucketSort.txt");
+            }
+            else if (seleccionMenu == 5)
+            {
+                std::cout << "Ejecutando Heap Sort...\n";
+                Ordenamientos::heapSort(registros, [](const Auto &a, const Auto &b)
+                                        { return a.placa < b.placa; });
+                Ordenamientos::guardarEnArchivo(registros, "autos_ordenados_HeapSort.txt");
+            }
+            else if (seleccionMenu == 6)
+            {
+                break; // Salir del menú
+            }
+            std::cout << "Ordenamiento completado.\n";
+            system("pause");
+        }
+    }
+}
 
 // Iniciar el menú interactivo
 void Menu::iniciar() {

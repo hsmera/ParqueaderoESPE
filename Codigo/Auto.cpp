@@ -12,3 +12,15 @@
 
 Auto::Auto(const string& placa, const string& marca, const string& color)
     : placa(placa), marca(marca), color(color) {}
+
+std::string Auto::getPlaca() const {
+    return placa; // Retorna la placa del auto
+}
+
+std::string Auto::getMarca() const {
+    return marca;
+}
+
+std::string Auto::getColor() const {
+    return color;
+}

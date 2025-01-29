@@ -9,18 +9,15 @@
  **************************************************************************************/
 
 #include "HistorialEstacionamiento.h"
-#include <algorithm> // Para std::copy_if
-#include <vector>
-#include <string>
+#include <fstream>
+#include <sstream>
 #include <iostream>
+using namespace std;
 
-
-// Constructor: carga el historial desde el archivo
 HistorialEstacionamiento::HistorialEstacionamiento() {
     cargarDesdeArchivo();
 }
 
-// Obtener la fecha y hora actual como string
 string HistorialEstacionamiento::obtenerFechaHoraActual() const {
     time_t now = time(nullptr);
     char buffer[20];
@@ -28,7 +25,6 @@ string HistorialEstacionamiento::obtenerFechaHoraActual() const {
     return string(buffer);
 }
 
-// Cargar historial desde el archivo
 void HistorialEstacionamiento::cargarDesdeArchivo() {
     ifstream archivoEntrada(archivoHistorial);
     if (!archivoEntrada.is_open()) {
@@ -46,12 +42,11 @@ void HistorialEstacionamiento::cargarDesdeArchivo() {
         getline(ss, fechaHoraIngreso, ',');
         getline(ss, fechaHoraSalida, ',');
 
-        historial.emplace_back(placa, espacioId, fechaHoraIngreso, fechaHoraSalida);
+        historial.insertar(placa, espacioId, fechaHoraIngreso, fechaHoraSalida);
     }
     archivoEntrada.close();
 }
 
-// Guardar historial en el archivo
 void HistorialEstacionamiento::guardarEnArchivo() {
     ofstream archivoSalida(archivoHistorial, ios::trunc);
     if (!archivoSalida.is_open()) {
@@ -59,66 +54,81 @@ void HistorialEstacionamiento::guardarEnArchivo() {
         return;
     }
 
-    for (const auto& registro : historial) {
-        archivoSalida << registro.placa << ","
-                      << registro.espacioId << ","
-                      << registro.fechaHoraIngreso << ","
-                      << registro.fechaHoraSalida << "\n";
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    for (const auto& registro : registros) {
+        archivoSalida << registro->placa << ","
+                      << registro->espacioId << ","
+                      << registro->fechaHoraIngreso << ","
+                      << registro->fechaHoraSalida << "\n";
     }
     archivoSalida.close();
 }
 
-// Registrar la entrada de un auto
 void HistorialEstacionamiento::registrarEntrada(const string& placa, const string& espacioId) {
     string fechaHora = obtenerFechaHoraActual();
-    historial.emplace_back(placa, espacioId, fechaHora);
+    historial.insertar(placa, espacioId, fechaHora);
     guardarEnArchivo();
     cout << "Entrada registrada: Placa " << placa << ", Espacio " << espacioId 
          << ", Fecha/Hora: " << fechaHora << endl;
 }
 
-// Registrar la salida de un auto
 void HistorialEstacionamiento::registrarSalida(const string& placa) {
-    for (auto& registro : historial) {
-        if (registro.placa == placa && registro.fechaHoraSalida.empty()) {
-            registro.fechaHoraSalida = obtenerFechaHoraActual();
-            guardarEnArchivo();
-            cout << "Salida registrada: Placa " << placa 
-                 << ", Fecha/Hora Salida: " << registro.fechaHoraSalida << endl;
-            return;
-        }
+    NodoRN* nodo = historial.buscar(placa);
+    if (nodo != nullptr && nodo->fechaHoraSalida.empty()) {
+        nodo->fechaHoraSalida = obtenerFechaHoraActual();
+        guardarEnArchivo();
+        cout << "Salida registrada: Placa " << placa 
+             << ", Fecha/Hora Salida: " << nodo->fechaHoraSalida << endl;
+    } else {
+        cout << "No se encontró una entrada activa para la placa " << placa << "." << endl;
     }
-    cout << "No se encontro una entrada activa para la placa " << placa << "." << endl;
 }
 
-// Mostrar todo el historial
 void HistorialEstacionamiento::mostrarHistorial() const {
-    if (historial.empty()) {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+
+    if (registros.empty()) {
         cout << "No hay registros en el historial." << endl;
         return;
     }
 
     cout << "Historial de Estacionamiento:\n";
-    for (const auto& registro : historial) {
-        cout << "Placa: " << registro.placa 
-             << ", Espacio: " << registro.espacioId 
-             << ", Ingreso: " << registro.fechaHoraIngreso 
-             << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida)
+    for (const auto& registro : registros) {
+        cout << "Placa: " << registro->placa 
+             << ", Espacio: " << registro->espacioId 
+             << ", Ingreso: " << registro->fechaHoraIngreso 
+             << ", Salida: " << (registro->fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro->fechaHoraSalida)
              << endl;
     }
 }
 
+string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
+    NodoRN* nodo = historial.buscar(placa);
+
+    if (nodo == nullptr) {
+        return "No se encontró historial para la placa " + placa;
+    }
+
+    string resultado = "Placa: " + nodo->placa 
+                     + ", Espacio: " + nodo->espacioId 
+                     + ", Ingreso: " + nodo->fechaHoraIngreso 
+                     + ", Salida: " + (nodo->fechaHoraSalida.empty() ? "Aun en el parqueadero" : nodo->fechaHoraSalida);
+    return resultado;
+}
+
 void HistorialEstacionamiento::mostrarHistorialPorFecha(const string& fecha) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
     bool encontrado = false;
+
     cout << "Historial de estacionamiento para la fecha: " << fecha << "\n";
     cout << "------------------------------------------------------\n";
 
-    for (const auto& registro : historial) {
-        if (registro.fechaHoraIngreso.substr(0, 10) == fecha) { // Compara la parte de la fecha (YYYY-MM-DD)
-            cout << "Placa: " << registro.placa 
-                 << ", Espacio: " << registro.espacioId 
-                 << ", Ingreso: " << registro.fechaHoraIngreso 
-                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
+    for (const auto& registro : registros) {
+        if (registro->fechaHoraIngreso.substr(0, 10) == fecha) {
+            cout << "Placa: " << registro->placa 
+                 << ", Espacio: " << registro->espacioId 
+                 << ", Ingreso: " << registro->fechaHoraIngreso 
+                 << ", Salida: " << (registro->fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro->fechaHoraSalida)
                  << "\n";
             encontrado = true;
         }
@@ -128,20 +138,20 @@ void HistorialEstacionamiento::mostrarHistorialPorFecha(const string& fecha) con
         cout << "No se encontraron registros para la fecha: " << fecha << ".\n";
     }
 }
-void HistorialEstacionamiento::mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const {
-    bool encontrado = false;
-    cout << "Historial de estacionamiento para la placa: " << placa 
-         << " y fecha: " << fecha << "\n";
-    cout << "------------------------------------------------------\n";
 
-    for (const auto& registro : historial) {
-        if (registro.placa == placa && registro.fechaHoraIngreso.substr(0, 10) == fecha) {
-            cout << "Placa: " << registro.placa 
-                 << ", Espacio: " << registro.espacioId 
-                 << ", Ingreso: " << registro.fechaHoraIngreso 
-                 << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
-                 << "\n";
+void HistorialEstacionamiento::mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden(); // Obtén todos los nodos en orden
+    bool encontrado = false; // Para verificar si se encontraron coincidencias
+
+    for (const auto& nodo : registros) {
+        // Filtra por placa y fecha
+        if (nodo->placa == placa && nodo->fechaHoraIngreso.substr(0, 10) == fecha) {
             encontrado = true;
+            cout << "Placa: " << nodo->placa 
+                 << ", Espacio: " << nodo->espacioId 
+                 << ", Ingreso: " << nodo->fechaHoraIngreso 
+                 << ", Salida: " << (nodo->fechaHoraSalida.empty() ? "Aun en el parqueadero" : nodo->fechaHoraSalida)
+                 << "\n";
         }
     }
 
@@ -151,50 +161,84 @@ void HistorialEstacionamiento::mostrarHistorialPorFechaYPlaca(const string& fech
     }
 }
 
-// Buscar historial por placa
-string HistorialEstacionamiento::buscarHistorial(const string& placa) const {
-    string resultado;
-    cout << "Buscando historial para la placa: " << placa << endl;
-    for (const auto& registro : historial) {
-        if (registro.placa == placa) {
-            resultado += "Placa: " + registro.placa 
-                       + ", Espacio: " + registro.espacioId 
-                       + ", Ingreso: " + registro.fechaHoraIngreso 
-                       + ", Salida: " + (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida) 
-                       + "\n";
+void HistorialEstacionamiento::mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    bool encontrado = false;
+
+    cout << "Historial de estacionamiento para el rango de horas: " << horaInicio << " - " << horaFin << "\n";
+    cout << "------------------------------------------------------\n";
+
+    for (const auto& registro : registros) {
+        string horaIngreso = registro->fechaHoraIngreso.substr(11, 8); // Extrae solo la hora
+        string horaSalida = registro->fechaHoraSalida.empty() ? "" : registro->fechaHoraSalida.substr(11, 8);
+
+        if ((horaIngreso >= horaInicio && horaIngreso <= horaFin) ||
+            (!horaSalida.empty() && horaSalida >= horaInicio && horaSalida <= horaFin)) {
+            cout << "Placa: " << registro->placa 
+                 << ", Espacio: " << registro->espacioId 
+                 << ", Ingreso: " << registro->fechaHoraIngreso 
+                 << ", Salida: " << (registro->fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro->fechaHoraSalida)
+                 << "\n";
+            encontrado = true;
         }
     }
-    return resultado.empty() ? "No se encontro historial para la placa " + placa : resultado;
+
+    if (!encontrado) {
+        cout << "No se encontraron registros en el rango de horas especificado." << endl;
+    }
 }
 
-void HistorialEstacionamiento::mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const {
-    vector<RegistroHistorial> resultados;
+void HistorialEstacionamiento::mostrarPrimerIngresoPorFecha(const string& fecha) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    NodoRN* primerIngreso = nullptr;
+    string horaMasTemprana = "23:59:59"; // Inicializamos con una hora alta
 
-    // Filtrar registros por rango de hora
-    copy_if(historial.begin(), historial.end(), back_inserter(resultados), [&](const RegistroHistorial& registro) {
-        // Extraer la hora de ingreso y salida
-        string horaIngreso = registro.fechaHoraIngreso.substr(11, 8); // Extraer solo la hora
-        string horaSalida = registro.fechaHoraSalida.empty() ? "" : registro.fechaHoraSalida.substr(11, 8);   // Extraer solo la hora, con control de vacío
+    for (const auto& registro : registros) {
+        if (registro->fechaHoraIngreso.substr(0, 10) == fecha) {  // Filtra por fecha
+            string horaIngreso = registro->fechaHoraIngreso.substr(11, 8); // Extrae HH:MM:SS
+            if (!primerIngreso || horaIngreso < horaMasTemprana) { // Compara la hora
+                primerIngreso = registro;
+                horaMasTemprana = horaIngreso;
+            }
+        }
+    }
 
-        // Compara las horas de ingreso y salida con el rango
-        return (horaIngreso >= horaInicio && horaIngreso <= horaFin) ||
-               (!horaSalida.empty() && horaSalida >= horaInicio && horaSalida <= horaFin); // Evitar comparar horaSalida vacía
-    });
-
-    if (resultados.empty()) {
-        cout << "No se encontraron registros en el rango de tiempo especificado." << endl;
+    if (!primerIngreso) {
+        cout << "No se encontraron registros para la fecha " << fecha << "." << endl;
         return;
     }
 
-    for (const auto& registro : resultados) {
-        cout << "Placa: " << registro.placa
-             << ", Espacio: " << registro.espacioId
-             << ", Ingreso: " << registro.fechaHoraIngreso
-             << ", Salida: " << (registro.fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro.fechaHoraSalida)
-             << endl;
-    }
+    string salida = primerIngreso->fechaHoraSalida.empty() ? "Aun en el parqueadero" : primerIngreso->fechaHoraSalida;
+
+    cout << "Primer ingreso del dia " << fecha << ":\n";
+    cout << "Placa: " << primerIngreso->placa
+         << ", Espacio: " << primerIngreso->espacioId
+         << ", Ingreso: " << primerIngreso->fechaHoraIngreso
+         << ", Salida: " << salida << endl;
 }
 
+void HistorialEstacionamiento::mostrarAutosPorRangoFechas(const string& fechaInicio, const string& fechaFin) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    bool encontrado = false;
 
+    cout << "Autos ingresados entre el " << fechaInicio << " y el " << fechaFin << ":\n";
+    cout << "------------------------------------------------------\n";
 
+    for (const auto& registro : registros) {
+        string fechaIngreso = registro->fechaHoraIngreso.substr(0, 10);
+        if (fechaIngreso >= fechaInicio && fechaIngreso <= fechaFin) {
+            string salida = registro->fechaHoraSalida.empty() ? "Aun en el parqueadero" : registro->fechaHoraSalida;
 
+            cout << "Placa: " << registro->placa
+                 << ", Espacio: " << registro->espacioId
+                 << ", Ingreso: " << registro->fechaHoraIngreso
+                 << ", Salida: " << salida << endl;
+
+            encontrado = true;
+        }
+    }
+
+    if (!encontrado) {
+        cout << "No se encontraron registros entre las fechas " << fechaInicio << " y " << fechaFin << "." << endl;
+    }
+}

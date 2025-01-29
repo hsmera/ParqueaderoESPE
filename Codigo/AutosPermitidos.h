@@ -35,6 +35,7 @@ public:
     void mostrarAutoPorPlaca(const string& placa) const;
     void mostrarPropietarios();
     void ordenarAutos();
+    std::list<Registro>& getRegistros();
 };
 
 #endif // AUTOSPERMITIDOS_H

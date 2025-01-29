@@ -10,13 +10,11 @@
 
 #include "Parqueadero.h"
 
-// Constructor: Inicializa el parqueadero
 Parqueadero::Parqueadero() : head(nullptr) {
     inicializarEspacios();
     cargarDesdeArchivo();
 }
 
-// Destructor: Libera la memoria asignada
 Parqueadero::~Parqueadero() {
     Nodo* temp = head;
     if (head) {
@@ -28,7 +26,6 @@ Parqueadero::~Parqueadero() {
     }
 }
 
-// Inicializar espacios en la lista doblemente enlazada circular
 void Parqueadero::inicializarEspacios() {
     for (int i = 1; i <= capacidad; i++) {
         string id = (i < 10 ? "0" : "") + to_string(i);
@@ -48,7 +45,6 @@ void Parqueadero::inicializarEspacios() {
     }
 }
 
-// Cargar estado del parqueadero desde el archivo
 void Parqueadero::cargarDesdeArchivo() {
     ifstream archivoEntrada(archivoParqueadero);
     if (!archivoEntrada.is_open()) {
@@ -74,7 +70,6 @@ void Parqueadero::cargarDesdeArchivo() {
     archivoEntrada.close();
 }
 
-// Guardar estado del parqueadero en el archivo
 void Parqueadero::guardarEnArchivo() {
     ofstream archivoSalida(archivoParqueadero, ios::trunc);
     if (!archivoSalida.is_open()) {
@@ -93,7 +88,6 @@ void Parqueadero::guardarEnArchivo() {
     archivoSalida.close();
 }
 
-// Mostrar el estado actual del parqueadero
 void Parqueadero::mostrarEstado() const {
     Nodo* actual = head;
     cout << "\nEstado del Parqueadero:\n";
@@ -115,7 +109,6 @@ void Parqueadero::mostrarEstado() const {
     cout << "\033[0m\n";  // Resetea el color al valor por defecto
 }
 
-// Estacionar un auto en un espacio específico
 bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
     Nodo* temp = head;
 

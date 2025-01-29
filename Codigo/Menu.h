@@ -28,9 +28,11 @@ private:
     vector<string> opciones;
     int seleccionActual;
 
-    void mostrarSubmenuAutosPermitidos();
+    void submenuBusquedas();
     void mostrarSubmenuHistorial();
     void ordenarAutosPermitidos();
+    void mostrarMenuOrdenamiento(std::list<Registro>& registros);  // Modificado
+
 
 public:
     Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);

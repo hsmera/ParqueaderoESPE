@@ -18,7 +18,7 @@
 
 class Parqueadero {
 private:
-    Nodo* head; // Nodo inicial de la lista doblemente enlazada circular
+    Nodo* head; 
     EspacioParqueadero manejadorEspacios;
     const int capacidad = 12;
     const string archivoParqueadero = "parqueadero.txt";

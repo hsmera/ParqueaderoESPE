@@ -8,25 +8,20 @@
  * NRC :                           1978                                                *
  **************************************************************************************/
 
-#include "AutosPermitidos.h"
 #include <iostream>
 #include <fstream>   // Para ifstream y ofstream
 #include <sstream>   // Para stringstream
-#include "Registro.h"
 #include "Parqueadero.h"
 #include <algorithm>
 #include <list>
+#include "AutosPermitidos.h"
+#include "Registro.h"
+#include <algorithm> // Para std::sort
 
-
-// Constructor: carga los datos desde el archivo
 AutosPermitidos::AutosPermitidos() {
     cargarDesdeArchivo();
 }
 
-Registro::Registro(const Auto& autoPermitido, const Propietario& propietario)
-    : autoPermitido(autoPermitido), propietario(propietario) {}
-
-// Cargar autos permitidos desde el archivo
 void AutosPermitidos::cargarDesdeArchivo() {
     ifstream archivoEntrada(archivo);
     if (!archivoEntrada.is_open()) {
@@ -53,7 +48,6 @@ void AutosPermitidos::cargarDesdeArchivo() {
     archivoEntrada.close();
 }
 
-// Guardar autos permitidos en el archivo
 void AutosPermitidos::guardarEnArchivo() {
     ofstream archivoSalida(archivo, ios::trunc);
     if (!archivoSalida.is_open()) {
@@ -70,7 +64,7 @@ void AutosPermitidos::guardarEnArchivo() {
 }
 
 void AutosPermitidos::guardarPropietarios() {
-    ofstream archivoPropietarios("Propietarios.txt", ios::trunc);
+    ofstream archivoPropietarios("Propietarios.txt", ios::app);
     if (!archivoPropietarios.is_open()) {
         cerr << "Error al abrir el archivo Propietarios.txt para guardar." << endl;
         return;
@@ -124,16 +118,23 @@ void AutosPermitidos::mostrarPropietarios() {
 void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& propietario) {
     for (const auto& registro : registros) {
         if (registro.autoPermitido.placa == autoPermitido.placa) {
-            cout << "El auto con placa " << autoPermitido.placa << " ya esta registrado." << endl;
+            cout << "El auto con placa " << autoPermitido.placa << " ya está registrado." << endl;
             return;
         }
     }
 
     registros.emplace_back(autoPermitido, propietario);
+
+    // Ordenar la lista después de agregar un nuevo auto (por placa)
+    registros.sort([](const Registro& a, const Registro& b) {
+        return a.getAutoPermitido().getPlaca() < b.getAutoPermitido().getPlaca();
+    });
+
     guardarEnArchivo();
     guardarPropietarios();
     cout << "Auto y propietario agregados correctamente." << endl;
 }
+
 
 // Buscar un auto por placa
 bool AutosPermitidos::buscarAuto(const string& placa) const {
@@ -150,12 +151,18 @@ void AutosPermitidos::eliminarAuto(const string& placa) {
     for (auto it = registros.begin(); it != registros.end(); ++it) {
         if (it->autoPermitido.placa == placa) {
             registros.erase(it);
+
+            // Ordenar la lista después de eliminar un auto
+            registros.sort([](const Registro& a, const Registro& b) {
+                return a.getAutoPermitido().getPlaca() < b.getAutoPermitido().getPlaca();
+            });
+
             guardarEnArchivo();
             cout << "Auto eliminado correctamente." << endl;
             return;
         }
     }
-    cout << "No se encontro un auto con la placa " << placa << "." << endl;
+    cout << "No se encontró un auto con la placa " << placa << "." << endl;
 }
 
 // Mostrar todos los autos permitidos
@@ -210,4 +217,8 @@ void AutosPermitidos::ordenarAutos() {
 
     // Guardar los autos ordenados en el archivo
     guardarEnArchivo();
+}
+
+std::list<Registro>& AutosPermitidos::getRegistros(){
+    return registros;
 }

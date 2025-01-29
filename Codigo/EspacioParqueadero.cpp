@@ -11,12 +11,10 @@
 #include "EspacioParqueadero.h"
 #include "Nodo.h"
 
-// Crear un nuevo nodo de espacio
 Nodo* EspacioParqueadero::crearEspacio(const string& id) {
     return new Nodo(id);
 }
 
-// Ocupar un espacio con la placa del auto
 void EspacioParqueadero::ocuparEspacio(Nodo* espacio, const string& placa) {
     if (!espacio->ocupado) {
         espacio->ocupado = true;
@@ -28,7 +26,6 @@ void EspacioParqueadero::ocuparEspacio(Nodo* espacio, const string& placa) {
     }
 }
 
-// Liberar un espacio ocupado
 void EspacioParqueadero::liberarEspacio(Nodo* espacio) {
     if (espacio->ocupado) {
         espacio->ocupado = false;
@@ -40,7 +37,6 @@ void EspacioParqueadero::liberarEspacio(Nodo* espacio) {
     }
 }
 
-// Obtener el estado de un espacio
 string EspacioParqueadero::obtenerEstado(const Nodo* espacio) const {
     if (espacio->ocupado) {
         return "Ocupado por " + espacio->placa;

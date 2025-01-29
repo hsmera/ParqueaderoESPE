@@ -10,5 +10,9 @@
 
 #include "Registro.h"
 
-Registro::Registro(const Auto& autoPermitido, const Propietario& propietario)
+Registro::Registro(const Auto &autoPermitido, const Propietario &propietario)
     : autoPermitido(autoPermitido), propietario(propietario) {}
+
+Auto Registro::getAutoPermitido() const {
+    return this->autoPermitido;  // Implementación de la función
+}

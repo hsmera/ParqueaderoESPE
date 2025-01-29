@@ -20,6 +20,8 @@ public:
     Propietario propietario;
 
     Registro(const Auto& autoPermitido, const Propietario& propietario);
+    Registro(const Auto& autoPermitido);
+    Auto getAutoPermitido() const;
 };
 
 #endif // REGISTRO_H

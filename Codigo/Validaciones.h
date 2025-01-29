@@ -33,6 +33,8 @@ public:
     std::string ingresarCorreo(char *msj);
     std::string ingresarEspacioId(const char *msj);
     static string ingresarHora(const string& mensaje);
+    std::string ingresarPrefijo(const char *msj);
+    bool validarCedulaEcuatoriana(const std::string& cedula);
 
 
 private:
@@ -245,7 +247,7 @@ std::string Validaciones<T>::ingresarFecha(char *msj)
         {
             if (c == '-' && ultimoCaract == '-') // Evitar guiones consecutivos
             {
-                continue; // Ignorar el guion y no agregarlo
+                continue;
             }
 
             if (i < 10) // Limitar a 10 caracteres
@@ -261,25 +263,70 @@ std::string Validaciones<T>::ingresarFecha(char *msj)
             {
                 printf("\b \b");
                 i--;
-                ultimoCaract = (i > 0) ? cad[i - 1] : 0; // Actualizar el último carácter al borrar
+                ultimoCaract = (i > 0) ? cad[i - 1] : 0;
             }
         }
     }
     cad[i] = '\0'; // Terminar la cadena
 
-    // Validar el formato
-    if (i != 10 || cad[4] != '-' || cad[7] != '-') // Verificar longitud y posiciones de los guiones
+    // Validar formato correcto YYYY-MM-DD
+    if (i != 10 || cad[4] != '-' || cad[7] != '-') 
     {
-        printf("\nFormato invalido. Intente de nuevo.\n");
-        return ingresarFecha(msj); // Llamar recursivamente en caso de error
+        printf("\nFormato inválido. Intente de nuevo.\n");
+        return ingresarFecha(msj);
     }
+
+    // Extraer el año y convertirlo a entero
+    int anio = std::stoi(std::string(cad, 4));
+
+    // Validar que el año sea >= 2020
+    if (anio < 2020) 
+    {
+        printf("\nEl año debe ser 2020 o posterior. Intente de nuevo.\n");
+        return ingresarFecha(msj);
+    }
+
     return std::string(cad); // Devolver la fecha válida
+}
+
+template <typename T>
+bool Validaciones<T>::validarCedulaEcuatoriana(const std::string& cedula) {
+    if (cedula.length() != 10) return false; // Verificar la longitud
+
+    // Verificar que todos los caracteres sean numéricos
+    for (char c : cedula) {
+        if (!isdigit(c)) return false;
+    }
+
+    int provincia = std::stoi(cedula.substr(0, 2)); // Obtener provincia
+    int tercerDigito = cedula[2] - '0'; // Obtener tercer dígito
+
+    if (provincia < 1 || provincia > 24) return false; // Provincia válida
+    if (tercerDigito < 0 || tercerDigito > 6) return false; // Tercer dígito válido
+
+    // Validar dígito verificador con el algoritmo oficial
+    int coeficientes[9] = {2, 1, 2, 1, 2, 1, 2, 1, 2};
+    int suma = 0;
+
+    for (int i = 0; i < 9; i++) {
+        int valor = (cedula[i] - '0') * coeficientes[i];
+        if (valor >= 10) valor -= 9;
+        suma += valor;
+    }
+
+    // Cálculo del dígito verificador
+    int digitoVerificadorCalculado = (10 - (suma % 10)) % 10;
+    if (digitoVerificadorCalculado == 10) digitoVerificadorCalculado = 0; // Si el dígito es 10, se toma como 0
+
+    int digitoVerificadorCedula = cedula[9] - '0'; // Convertir décimo dígito a entero
+
+    return (digitoVerificadorCalculado == digitoVerificadorCedula); // Comparar
 }
 
 template <typename T>
 std::string Validaciones<T>::ingresarCedula(char *msj)
 {
-    char cad[20]; // Tamaño máximo para la cédula
+    char cad[11]; // 10 dígitos + '\0'
     char c;
     int i = 0;
     printf("%s", msj);
@@ -307,10 +354,10 @@ std::string Validaciones<T>::ingresarCedula(char *msj)
 
     std::string cedula(cad);
 
-    // Validar longitud de la cédula (10 dígitos)
-    if (cedula.length() != 10) {
-        printf("\nCedula invalida. Intente de nuevo.\n");
-        return ingresarCedula(msj); // Recursividad en caso de error
+    // Validar la cédula usando el algoritmo de verificación
+    if (!validarCedulaEcuatoriana(cedula)) {
+        printf("\nCédula inválida. Intente de nuevo.\n");
+        return ingresarCedula(msj); // Pedir la cédula nuevamente
     }
 
     return cedula; // Devolver la cédula válida
@@ -386,21 +433,91 @@ std::string Validaciones<T>::ingresarEspacioId(const char* msj) {
 // Definición de la función ingresarHora en el mismo archivo
 template <typename T>
 string Validaciones<T>::ingresarHora(const string& mensaje) {
-    regex formatoHora("^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$");
     string hora;
+    int countDosPuntos = 0;
+
     while (true) {
         cout << mensaje;
-        cin >> hora;
+        hora.clear();
+        countDosPuntos = 0;
         
-        // Limpiar el buffer en caso de que haya caracteres extraños
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        
-        if (regex_match(hora, formatoHora)) {
-            break;
-        } else {
-            cout << "Hora inválida. Por favor, ingrese una hora en el formato HH:MM:SS.\n";
+        char c;
+        while (hora.length() < 8) { // Máximo 8 caracteres
+            c = getch(); // Capturar carácter
+
+            if (isdigit(c)) { 
+                hora += c;
+                cout << c;
+            } else if (c == ':' && countDosPuntos < 2) { 
+                hora += c;
+                cout << c;
+                countDosPuntos++;
+            } else if (c == 8 && !hora.empty()) { // Retroceso (Backspace)
+                if (hora.back() == ':') {
+                    countDosPuntos--;
+                }
+                cout << "\b \b";
+                hora.pop_back();
+            } else if (c == 13) { // Enter para confirmar
+                break;
+            }
         }
+
+        if (hora.length() == 8 && countDosPuntos == 2) {
+            regex formatoHora("^([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$");
+            if (regex_match(hora, formatoHora)) {
+                cout << endl;
+                break;
+            }
+        }
+
+        cout << "\nHora invalida. Ingrese en formato HH:MM:SS.\n";
     }
+
     return hora;
 }
+
+template <typename T>
+string Validaciones<T>::ingresarPrefijo(const char* msj) {
+    char cad[4]; // Solo permitiremos hasta 3 letras + '\0'
+    char c;
+    int i = 0;
+
+    // Lista de las primeras letras válidas para provincias de Ecuador
+    const std::string provincias = "AEBPYLJOTUSMCFRHGDIXKVZ";
+
+    printf("%s", msj);
+
+    while ((c = getch()) != 13) { // Enter para finalizar
+        if (isalpha(c)) { // Solo permitir letras
+            if (i < 3) { // Limitar a un máximo de 3 caracteres
+                c = toupper(c); // Convertir a mayúsculas
+                printf("%c", c);
+                cad[i++] = c;
+            }
+        } else if (c == 8) { // Backspace para borrar
+            if (i > 0) {
+                printf("\b \b");
+                i--;
+            }
+        }
+    }
+
+    cad[i] = '\0'; // Terminar la cadena
+
+    // Validar que la primera letra sea una provincia válida
+    if (i == 0 || provincias.find(cad[0]) == std::string::npos) {
+        printf("\nEl prefijo no puede estar vacio y debe iniciar con una letra valida de provincia. Intente de nuevo.\n");
+        return ingresarPrefijo(msj); // Llamar recursivamente en caso de error
+    }
+
+    // Validar que no exceda 3 caracteres
+    if (i > 3 || i < 3) {
+        printf("\nEl prefijo debe tener un minimo de 3 letras. Intente de nuevo.\n");
+        return ingresarPrefijo(msj); // Llamar recursivamente en caso de error
+    }
+
+    return std::string(cad); // Devolver el prefijo válido
+}
+
 #endif

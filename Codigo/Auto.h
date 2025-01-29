@@ -21,6 +21,9 @@ public:
     string color;
 
     Auto(const string& placa, const string& marca, const string& color);
+    string getPlaca() const; 
+    string getMarca() const;
+    string getColor() const;
 };
 
 #endif // AUTO_H
