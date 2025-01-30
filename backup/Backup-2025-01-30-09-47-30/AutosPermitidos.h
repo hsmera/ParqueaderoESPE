@@ -8,41 +8,34 @@
  * NRC :                           1978                                                *
  **************************************************************************************/
 
-#ifndef MENU_H
-#define MENU_H
+#ifndef AUTOSPERMITIDOS_H
+#define AUTOSPERMITIDOS_H
 
-#include "Parqueadero.h"
-#include "AutosPermitidos.h"
-#include "HistorialEstacionamiento.h"
-#include <vector>
-#include <string>
-#include <iostream>
-#include <conio.h>
+#include "Auto.h"
+#include "Propietario.h"
+#include "Registro.h"  
 #include <list>
-#include "Backup.h"
+#include <string>
 
-class Menu {
+class AutosPermitidos {
 private:
-    Parqueadero* parqueadero;
-    HistorialEstacionamiento* historial;
-    AutosPermitidos* autosPermitidos;
+    std::list<Registro> registros;  // Vector de objetos Registro
+    const std::string archivo = "autos_permitidos.txt";
 
-    vector<string> opciones;
-    int seleccionActual;
-
-    void submenuBusquedas();
-    void mostrarSubmenuHistorial();
-    void ordenarAutosPermitidos();
-    void mostrarMenuOrdenamiento(std::list<Registro>& registros);  // Modificado
-    void mostrarSubmenuBackup(Backup& backup);
-
+    void cargarDesdeArchivo();
+    void guardarEnArchivo();
+    void guardarPropietarios();
 
 public:
-    Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);
-    void mostrarMenu();
-    void ejecutarOpcion();
-    void iniciar();
-    void mostrarGuiaRapida();
+    AutosPermitidos();
+    void agregarAuto(const Auto& autoPermitido, const Propietario& propietario);
+    bool buscarAuto(const std::string& placa) const;
+    void eliminarAuto(const std::string& placa);
+    void mostrarAutos() const;
+    void mostrarAutoPorPlaca(const string& placa) const;
+    void mostrarPropietarios();
+    void ordenarAutos();
+    std::list<Registro>& getRegistros();
 };
 
-#endif // MENU_H
+#endif // AUTOSPERMITIDOS_H

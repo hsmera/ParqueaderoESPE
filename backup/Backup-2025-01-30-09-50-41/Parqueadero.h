@@ -8,41 +8,32 @@
  * NRC :                           1978                                                *
  **************************************************************************************/
 
-#ifndef MENU_H
-#define MENU_H
+#ifndef PARQUEADERO_H
+#define PARQUEADERO_H
 
-#include "Parqueadero.h"
-#include "AutosPermitidos.h"
-#include "HistorialEstacionamiento.h"
+#include "EspacioParqueadero.h"
 #include <vector>
-#include <string>
-#include <iostream>
-#include <conio.h>
-#include <list>
-#include "Backup.h"
+#include <fstream>
+#include <sstream>
 
-class Menu {
+class Parqueadero {
 private:
-    Parqueadero* parqueadero;
-    HistorialEstacionamiento* historial;
-    AutosPermitidos* autosPermitidos;
+    Nodo* head; 
+    EspacioParqueadero manejadorEspacios;
+    const int capacidad = 12;
+    const string archivoParqueadero = "parqueadero.txt";
 
-    vector<string> opciones;
-    int seleccionActual;
-
-    void submenuBusquedas();
-    void mostrarSubmenuHistorial();
-    void ordenarAutosPermitidos();
-    void mostrarMenuOrdenamiento(std::list<Registro>& registros);  // Modificado
-    void mostrarSubmenuBackup(Backup& backup);
-
+    void inicializarEspacios();
+    void cargarDesdeArchivo();
+    void guardarEnArchivo();
 
 public:
-    Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);
-    void mostrarMenu();
-    void ejecutarOpcion();
-    void iniciar();
-    void mostrarGuiaRapida();
+    Parqueadero();
+    ~Parqueadero();
+
+    void mostrarEstado() const;
+    bool estacionarAuto(const string& placa, const string& espacioId);
+    bool retirarAuto(const string& placa);
 };
 
-#endif // MENU_H
+#endif // PARQUEADERO_H

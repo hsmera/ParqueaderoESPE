@@ -8,41 +8,25 @@
  * NRC :                           1978                                                *
  **************************************************************************************/
 
-#ifndef MENU_H
-#define MENU_H
+#ifndef NODO_H
+#define NODO_H
 
-#include "Parqueadero.h"
-#include "AutosPermitidos.h"
-#include "HistorialEstacionamiento.h"
-#include <vector>
 #include <string>
-#include <iostream>
-#include <conio.h>
-#include <list>
-#include "Backup.h"
+#include <ctime>
+using namespace std;
 
-class Menu {
-private:
-    Parqueadero* parqueadero;
-    HistorialEstacionamiento* historial;
-    AutosPermitidos* autosPermitidos;
-
-    vector<string> opciones;
-    int seleccionActual;
-
-    void submenuBusquedas();
-    void mostrarSubmenuHistorial();
-    void ordenarAutosPermitidos();
-    void mostrarMenuOrdenamiento(std::list<Registro>& registros);  // Modificado
-    void mostrarSubmenuBackup(Backup& backup);
-
-
+class Nodo {
 public:
-    Menu(Parqueadero* p, HistorialEstacionamiento* h, AutosPermitidos* a);
-    void mostrarMenu();
-    void ejecutarOpcion();
-    void iniciar();
-    void mostrarGuiaRapida();
+    string id;          
+    bool ocupado;       
+    string placa;       
+    time_t horaIngreso; // Tiempo de ingreso (0 si está libre)
+    Nodo* siguiente;
+    Nodo* anterior;
+
+    Nodo(const string& id);
+
+    void mostrarEstado() const;
 };
 
-#endif // MENU_H
+#endif // NODO_H
