@@ -72,15 +72,26 @@ void HistorialEstacionamiento::registrarEntrada(const string& placa, const strin
          << ", Fecha/Hora: " << fechaHora << endl;
 }
 
-void HistorialEstacionamiento::registrarSalida(const string& placa) {
-    NodoRN* nodo = historial.buscar(placa);
-    if (nodo != nullptr && nodo->fechaHoraSalida.empty()) {
-        nodo->fechaHoraSalida = obtenerFechaHoraActual();
+bool HistorialEstacionamiento::registrarSalida(const string& placa) {
+    NodoRN* nodoEncontrado = nullptr;
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+
+    // Buscar la entrada más reciente que aún no tiene salida
+    for (const auto& nodo : registros) {
+        if (nodo->placa == placa && nodo->fechaHoraSalida.empty()) {
+            nodoEncontrado = nodo;
+        }
+    }
+
+    if (nodoEncontrado != nullptr) {
+        nodoEncontrado->fechaHoraSalida = obtenerFechaHoraActual();
         guardarEnArchivo();
-        cout << "Salida registrada: Placa " << placa 
-             << ", Fecha/Hora Salida: " << nodo->fechaHoraSalida << endl;
+        cout << "\nSalida registrada para placa " << nodoEncontrado->placa 
+             << " a las " << nodoEncontrado->fechaHoraSalida << "." << endl;
+        return true;
     } else {
-        cout << "No se encontró una entrada activa para la placa " << placa << "." << endl;
+        cout << "No se encontro una entrada activa para la placa " << placa << "." << endl;
+        return false;
     }
 }
 

@@ -33,7 +33,7 @@ public:
     HistorialEstacionamiento();             // Constructor
 
     void registrarEntrada(const string& placa, const string& espacioId);
-    void registrarSalida(const string& placa);
+    bool registrarSalida(const string& placa);
     void mostrarHistorial() const;
     string buscarHistorial(const string& placa) const;
     void mostrarHistorialPorFecha(const string& fecha) const;

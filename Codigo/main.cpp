@@ -11,10 +11,9 @@
 #include "Menu.h"
 
 int main() {
-    Parqueadero parqueadero;
     HistorialEstacionamiento historial;
     AutosPermitidos autosPermitidos;
-
+    Parqueadero parqueadero(&historial);
     Menu menu(&parqueadero, &historial, &autosPermitidos);
     menu.iniciar();
 

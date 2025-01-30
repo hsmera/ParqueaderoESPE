@@ -10,7 +10,7 @@
 
 #include "Parqueadero.h"
 
-Parqueadero::Parqueadero() : head(nullptr) {
+Parqueadero::Parqueadero(HistorialEstacionamiento* historial) : head(nullptr), historial(historial) {
     inicializarEspacios();
     cargarDesdeArchivo();
 }
@@ -90,23 +90,41 @@ void Parqueadero::guardarEnArchivo() {
 
 void Parqueadero::mostrarEstado() const {
     Nodo* actual = head;
-    cout << "\nEstado del Parqueadero:\n";
-
-    // Imprime los primeros 6 espacios en la parte superior
-    for (int i = 0; i < 6; ++i) {
-        if (actual == nullptr) break;  // Si no hay más nodos, salimos
-        cout << (actual->ocupado ? "\033[31m" : "\033[0m") << "[" << actual->id << "] ";
-        actual = actual->siguiente;
+    if (!actual) {
+        cout << "No hay espacios de estacionamiento disponibles.\n";
+        return;
     }
-    cout << "\n";
 
-    // Imprime los siguientes 6 espacios en la parte inferior
-    for (int i = 0; i < 6; ++i) {
-        if (actual == nullptr) break;  // Si no hay más nodos, salimos
-        cout << (actual->ocupado ? "\033[31m" : "\033[0m") << "[" << actual->id << "] ";
+    cout << "\n\033[33mReferencia (Entrada)\033[0m\n";  // Color amarillo para la referencia
+    cout << "--------------------------------------\n";
+
+    // Determinar el número total de espacios y la mitad para dividir en dos columnas
+    int totalEspacios = capacidad;
+    int mitad = totalEspacios / 2; 
+
+    // Mostrar en dos columnas
+    for (int i = 0; i < mitad; ++i) {
+        // Primera columna
+        cout << (actual->ocupado ? "\033[31m" : "\033[32m") // Rojo ocupado, verde libre
+             << "[" << actual->id << "] "
+             << "\033[0m";  // Reset color
         actual = actual->siguiente;
+
+        // Espaciado para alinear las dos columnas
+        cout << "     ";  
+
+        // Segunda columna
+        if (actual) {
+            cout << (actual->ocupado ? "\033[31m" : "\033[32m") 
+                 << "[" << actual->id << "] "
+                 << "\033[0m";
+            actual = actual->siguiente;
+        }
+
+        cout << endl;
     }
-    cout << "\033[0m\n";  // Resetea el color al valor por defecto
+
+    cout << "--------------------------------------\n";
 }
 
 bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
@@ -115,23 +133,24 @@ bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
     // Verificar si la placa ya está estacionada en algún espacio
     do {
         if (temp->placa == placa) {
-            cout << "El vehiculo con placa " << placa << " ya esta estacionado en el espacio " << temp->id << "." << endl;
+            cout << "El vehiculo con placa " << placa << " ya está estacionado en el espacio " << temp->id << "." << endl;
             return false;
         }
         temp = temp->siguiente;
     } while (temp != head);
 
-    // Reiniciar la búsqueda para ubicar el espacio especificado
+    // Buscar el espacio específico
     temp = head;
     do {
         if (temp->id == espacioId) {
             if (!temp->ocupado) {
                 manejadorEspacios.ocuparEspacio(temp, placa);
+                this->historial->registrarEntrada(placa, espacioId);  // Registrar entrada
                 guardarEnArchivo();
                 cout << "El vehiculo con placa " << placa << " fue estacionado en el espacio " << espacioId << "." << endl;
                 return true;
             } else {
-                cout << "El espacio " << espacioId << " ya esta ocupado." << endl;
+                cout << "El espacio " << espacioId << " ya está ocupado." << endl;
                 return false;
             }
         }
@@ -146,13 +165,20 @@ bool Parqueadero::retirarAuto(const string& placa) {
     Nodo* temp = head;
     do {
         if (temp->ocupado && temp->placa == placa) {
+            // Intentar registrar la salida en el historial
+            if (!this->historial->registrarSalida(placa)) {
+                cout << "Error: No se pudo registrar la salida en el historial. No se liberará el espacio." << endl;
+                return false;  // No libera el espacio si la salida no se registró
+            }
+
             manejadorEspacios.liberarEspacio(temp);
             guardarEnArchivo();
+            cout << "Vehiculo con placa " << placa << " retirado del espacio " << temp->id << "." << endl;
             return true;
         }
         temp = temp->siguiente;
     } while (temp != head);
 
-    cout << "No se encontro un auto con la placa " << placa << "." << endl;
+    cout << "No se encontró un auto con la placa " << placa << "." << endl;
     return false;
 }

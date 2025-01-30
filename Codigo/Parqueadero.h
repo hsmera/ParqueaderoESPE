@@ -15,6 +15,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include "HistorialEstacionamiento.h"
 
 class Parqueadero {
 private:
@@ -22,13 +23,14 @@ private:
     EspacioParqueadero manejadorEspacios;
     const int capacidad = 12;
     const string archivoParqueadero = "parqueadero.txt";
+    HistorialEstacionamiento* historial;
 
     void inicializarEspacios();
     void cargarDesdeArchivo();
     void guardarEnArchivo();
 
 public:
-    Parqueadero();
+    Parqueadero(HistorialEstacionamiento* historial);
     ~Parqueadero();
 
     void mostrarEstado() const;
