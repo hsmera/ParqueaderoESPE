@@ -127,37 +127,45 @@ void Parqueadero::mostrarEstado() const {
     cout << "--------------------------------------\n";
 }
 
-bool Parqueadero::estacionarAuto(const string& placa, const string& espacioId) {
-    Nodo* temp = head;
+bool Parqueadero::estacionarAuto(const string& placa, string& espacioId) {
+    Nodo* espacioDisponible = nullptr;
 
-    // Verificar si la placa ya está estacionada en algún espacio
-    do {
-        if (temp->placa == placa) {
-            cout << "El vehiculo con placa " << placa << " ya está estacionado en el espacio " << temp->id << "." << endl;
+    if (espacioId.empty()) {
+        // Si no se especifica un espacio, buscar el más cercano con búsqueda binaria
+        espacioDisponible = buscarEspacioCercano();
+    } else {
+        // Buscar el nodo correspondiente al espacioId
+        Nodo* temp = head;
+        do {
+            if (temp->id == espacioId) {
+                if (!temp->ocupado) {
+                    espacioDisponible = temp;
+                } else {
+                    cout << "El espacio " << espacioId << " ya esta ocupado.\n";
+                    return false;
+                }
+                break;
+            }
+            temp = temp->siguiente;
+        } while (temp != head);
+
+        if (!espacioDisponible) {
+            cout << "El espacio " << espacioId << " no existe.\n";
             return false;
         }
-        temp = temp->siguiente;
-    } while (temp != head);
+    }
 
-    // Buscar el espacio específico
-    temp = head;
-    do {
-        if (temp->id == espacioId) {
-            if (!temp->ocupado) {
-                manejadorEspacios.ocuparEspacio(temp, placa);
-                this->historial->registrarEntrada(placa, espacioId);  // Registrar entrada
-                guardarEnArchivo();
-                cout << "El vehiculo con placa " << placa << " fue estacionado en el espacio " << espacioId << "." << endl;
-                return true;
-            } else {
-                cout << "El espacio " << espacioId << " ya está ocupado." << endl;
-                return false;
-            }
-        }
-        temp = temp->siguiente;
-    } while (temp != head);
+    if (espacioDisponible) {
+        // Ocupar el espacio con la placa del vehículo
+        manejadorEspacios.ocuparEspacio(espacioDisponible, placa);
+        guardarEnArchivo();  // Guardar el estado después de la asignación
 
-    cout << "Espacio " << espacioId << " no encontrado." << endl;
+        espacioId = espacioDisponible->id; // Actualizar espacioId con el ID asignado
+        cout << "El vehiculo con placa " << placa << " fue estacionado en el espacio " << espacioId << ".\n";
+        return true;
+    }
+
+    cout << "No hay espacios disponibles en este momento.\n";
     return false;
 }
 
@@ -167,7 +175,7 @@ bool Parqueadero::retirarAuto(const string& placa) {
         if (temp->ocupado && temp->placa == placa) {
             // Intentar registrar la salida en el historial
             if (!this->historial->registrarSalida(placa)) {
-                cout << "Error: No se pudo registrar la salida en el historial. No se liberará el espacio." << endl;
+                cout << "Error: No se pudo registrar la salida en el historial. No se liberara el espacio." << endl;
                 return false;  // No libera el espacio si la salida no se registró
             }
 
@@ -179,6 +187,18 @@ bool Parqueadero::retirarAuto(const string& placa) {
         temp = temp->siguiente;
     } while (temp != head);
 
-    cout << "No se encontró un auto con la placa " << placa << "." << endl;
+    cout << "No se encontro un auto con la placa " << placa << "." << endl;
     return false;
+}
+
+Nodo* Parqueadero::buscarEspacioCercano() {
+    Nodo* actual = head;
+    do {
+        if (!actual->ocupado) {  // Si el espacio está libre
+            return actual;
+        }
+        actual = actual->siguiente;
+    } while (actual != head);
+    
+    return nullptr;  // Si no se encuentra un espacio libre
 }

@@ -34,8 +34,9 @@ public:
     ~Parqueadero();
 
     void mostrarEstado() const;
-    bool estacionarAuto(const string& placa, const string& espacioId);
+    bool estacionarAuto(const string& placa, string& espacioId);
     bool retirarAuto(const string& placa);
+    Nodo* buscarEspacioCercano();
 };
 
 #endif // PARQUEADERO_H

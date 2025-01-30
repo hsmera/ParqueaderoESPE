@@ -73,30 +73,46 @@ void Menu::ejecutarOpcion()
         parqueadero->mostrarEstado();
         break;
     case 1:
-    { // Estacionar auto
+    {
         string placa, espacioId;
         Validaciones<string> validador;
-        Validaciones<int> ingresar_Entero;
 
+        // Ingresar y validar la placa
         placa = validador.ingresarPlaca("Ingresa la placa del auto a estacionar (sin guiones): ");
         cout << endl;
 
+        // Verificar si el auto está permitido
         if (!autosPermitidos->buscarAuto(placa))
         {
-            cout << "El auto no está permitido. Regístrelo primero.\n";
+            cout << "El auto no esta permitido. Registrelo primero.\n";
             break;
         }
 
+        // Mostrar estado actual del parqueadero
         parqueadero->mostrarEstado();
-        espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio a estacionarse: ");
-        cout << endl;
 
-        // `estacionarAuto` ya registra la entrada en el historial
-        parqueadero->estacionarAuto(placa, espacioId);
+        // Preguntar si desea elegir un espacio específico o asignación automática
+        cout << "Desea elegir un espacio especifico? (S/N): ";
+        char opcion;
+        cin >> opcion;
 
+        if (toupper(opcion) == 'S')
+        {
+            espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio a estacionarse: ");
+            cout << endl;
+        }
+        else 
+        {
+            espacioId = ""; // Forzar asignación automática
+        }
+
+        // Asignar el espacio y registrar la entrada en el menú
+        if (parqueadero->estacionarAuto(placa, espacioId))
+        {
+            historial->registrarEntrada(placa, espacioId); // Registrar la entrada con el espacio correcto
+        }
         break;
     }
-
     case 2:
     { // Retirar auto
         string placa;
