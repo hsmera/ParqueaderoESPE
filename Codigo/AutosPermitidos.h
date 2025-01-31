@@ -36,6 +36,7 @@ public:
     void mostrarPropietarios();
     void ordenarAutos();
     std::list<Registro>& getRegistros();
+    bool existeCedula(const string& cedula);
 };
 
 #endif // AUTOSPERMITIDOS_H

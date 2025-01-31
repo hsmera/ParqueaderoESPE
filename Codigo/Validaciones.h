@@ -18,6 +18,10 @@
 #include <regex>
 #include <set>
 #include <limits>
+#include <ctime>    // Para obtener la fecha actual // Para usar getch()
+#include <string> 
+#include <cctype>    // Para isalpha() y isdigit()
+#include <set>       // Para manejar la lista de provincias válidas
 
 using namespace std;
 
@@ -181,55 +185,63 @@ T Validaciones<T>::ingresar(char *msj, char *tipo)
 template <typename T>
 std::string Validaciones<T>::ingresarPlaca(char *msj)
 {
-    char cad[20]; // Tamaño máximo para la placa
+    char cad[8]; // Placa ecuatoriana debe ser EXACTAMENTE 7 caracteres (AAA1234)
     char c;
     int i = 0;
+
+    // Provincias válidas en Ecuador (primera letra de la placa)
+    std::set<char> provinciasValidas = {'A', 'B', 'U', 'G', 'X', 'W', 'P', 'Y', 'T', 'O',
+                                         'M', 'N', 'S', 'R', 'H', 'Z', 'J', 'K', 'Q', 'I', 'E', 'L', 'V', 'C'};
+
     printf("%s", msj);
 
-    while ((c = getch()) != 13) // Enter para finalizar
+    while (i < 7) // Solo permitimos 7 caracteres
     {
-        if (isalnum(c)) // Permitir solo letras y números
+        c = getch();
+
+        if (i < 3) // Primeros 3 caracteres deben ser letras
         {
-            if (i < 19) // Limitar el tamaño
+            if (isalpha(c))
             {
                 c = toupper(c); // Convertir a mayúscula
                 printf("%c", c);
                 cad[i++] = c;
             }
         }
-        else if (c == 8) // Backspace para borrar
+        else if (i >= 3 && i < 7) // Últimos 4 caracteres deben ser números
         {
-            if (i > 0)
+            if (isdigit(c))
             {
-                printf("\b \b");
-                i--;
+                printf("%c", c);
+                cad[i++] = c;
             }
         }
+        else if (c == 8 && i > 0) // Backspace para borrar
+        {
+            printf("\b \b");
+            i--;
+        }
     }
-    cad[i] = '\0'; // Terminar la cadena
 
-    // Convertir a std::string para validar
+    cad[i] = '\0'; // Finalizar la cadena
     std::string placa(cad);
 
-    // Validar formato de placa ecuatoriana
-    std::regex formatoEcuador(R"([A-Z]{3}\d{3,4}[A-Z]?)"); // AAA1234 o AAA123A
-    if (!std::regex_match(placa, formatoEcuador))
+    // **Validación final antes de devolver**
+    if (placa.length() != 7) // Asegurar que sean exactamente 7 caracteres
     {
-        printf("\nFormato de placa invalido. Intente de nuevo.\n");
-        return ingresarPlaca(msj); // Llamar recursivamente en caso de error
+        printf("\nError: La placa debe tener exactamente 7 caracteres.\n");
+        return ingresarPlaca(msj); // Reintentar si hay error
     }
 
-    // Validar los primeros tres caracteres (región o provincia)
-    std::set<std::string> provinciasValidas = {
-        "A", "B", "U", "G", "X", "W", "P", "Y", "T", "O", "M", "N", "S", "R", "H", "Z", "J", "K", "Q", "I", "E", "L", "V", "C"};
-    std::string provincia = placa.substr(0, 1);
-    if (provinciasValidas.find(provincia) == provinciasValidas.end())
+    // **Validar la provincia (primera letra)**
+    if (provinciasValidas.find(placa[0]) == provinciasValidas.end())
     {
-        printf("\nCodigo de provincia invalido. Intente de nuevo.\n");
-        return ingresarPlaca(msj); // Llamar recursivamente en caso de error
+        printf("\nError: La primera letra de la placa no corresponde a una provincia de Ecuador.\n");
+        return ingresarPlaca(msj); // Reintentar si hay error
     }
 
-    return placa; // Devolver la placa válida
+    printf("\nPlaca ingresada correctamente.\n");
+    return placa;
 }
 
 template <typename T>
@@ -239,6 +251,7 @@ std::string Validaciones<T>::ingresarFecha(char *msj)
     char c;
     int i = 0;
     char ultimoCaract = 0; // Para guardar el último carácter ingresado
+
     printf("%s", msj);
 
     while ((c = getch()) != 13) // Enter para finalizar
@@ -247,7 +260,7 @@ std::string Validaciones<T>::ingresarFecha(char *msj)
         {
             if (c == '-' && ultimoCaract == '-') // Evitar guiones consecutivos
             {
-                continue;
+                continue; // Ignorar el guion y no agregarlo
             }
 
             if (i < 10) // Limitar a 10 caracteres
@@ -263,30 +276,58 @@ std::string Validaciones<T>::ingresarFecha(char *msj)
             {
                 printf("\b \b");
                 i--;
-                ultimoCaract = (i > 0) ? cad[i - 1] : 0;
+                ultimoCaract = (i > 0) ? cad[i - 1] : 0; // Actualizar el último carácter al borrar
             }
         }
     }
     cad[i] = '\0'; // Terminar la cadena
 
-    // Validar formato correcto YYYY-MM-DD
-    if (i != 10 || cad[4] != '-' || cad[7] != '-') 
+    //Validar el formato correcto**
+    if (i != 10 || cad[4] != '-' || cad[7] != '-') // Verificar longitud y posiciones de los guiones
     {
-        printf("\nFormato inválido. Intente de nuevo.\n");
+        printf("\nFormato invalido. Intente de nuevo.\n");
+        return ingresarFecha(msj); // Llamar recursivamente en caso de error
+    }
+
+    //  Extraer Año, Mes y Día**
+    int anio, mes, dia;
+    sscanf(cad, "%d-%d-%d", &anio, &mes, &dia); // Extraer los valores de la fecha
+
+    //Validar el año (Debe estar entre 2020 y el año actual)**
+    time_t t = time(nullptr);
+    struct tm *now = localtime(&t);
+    int anioActual = now->tm_year + 1900; // Año actual
+
+    if (anio < 2020 || anio > anioActual)
+    {
+        printf("\nFecha invalida. El anio debe estar entre 2020 y %d.\n", anioActual);
         return ingresarFecha(msj);
     }
 
-    // Extraer el año y convertirlo a entero
-    int anio = std::stoi(std::string(cad, 4));
-
-    // Validar que el año sea >= 2020
-    if (anio < 2020) 
+    // Validar el mes (1-12)**
+    if (mes < 1 || mes > 12)
     {
-        printf("\nEl año debe ser 2020 o posterior. Intente de nuevo.\n");
+        printf("\nFecha invalida. El mes debe estar entre 1 y 12.\n");
         return ingresarFecha(msj);
     }
 
-    return std::string(cad); // Devolver la fecha válida
+    // Validar el día según el mes**
+    int diasPorMes[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // Meses [1-12]
+    
+    // Verificar si el año es bisiesto (para ajustar febrero)
+    if ((anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0))
+    {
+        diasPorMes[2] = 29; // Año bisiesto, febrero tiene 29 días
+    }
+
+    if (dia < 1 || dia > diasPorMes[mes])
+    {
+        printf("\nFecha invalida. El dia ingresado no es valido para el mes especificado.\n");
+        return ingresarFecha(msj);
+    }
+
+    // **Si todas las validaciones pasan, retornamos la fecha válida**
+    return std::string(cad);
 }
 
 template <typename T>
@@ -356,7 +397,7 @@ std::string Validaciones<T>::ingresarCedula(char *msj)
 
     // Validar la cédula usando el algoritmo de verificación
     if (!validarCedulaEcuatoriana(cedula)) {
-        printf("\nCédula inválida. Intente de nuevo.\n");
+        printf("\nCédula invalida. Intente de nuevo.\n");
         return ingresarCedula(msj); // Pedir la cédula nuevamente
     }
 
@@ -395,15 +436,52 @@ std::string Validaciones<T>::ingresarCorreo(char *msj)
 
     std::string correo(cad);
 
-    // Validar formato del correo usando una expresión regular
-    std::regex formatoCorreo(R"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})");
-    if (!std::regex_match(correo, formatoCorreo)) {
-        printf("\nCorreo electrónico invalido. Intente de nuevo.\n");
-        return ingresarCorreo(msj); // Recursividad en caso de error
+    // **Validar que antes del '@' solo haya letras o números, sin puntos al inicio**
+    size_t posAt = correo.find('@');
+    if (posAt == std::string::npos || posAt == 0) {
+        printf("\nCorreo invalido: Debe contener un '@' y no puede empezar con el.\n");
+        return ingresarCorreo(msj);
     }
 
+    // **Validar que haya exactamente un '@'**
+    if (correo.find('@', posAt + 1) != std::string::npos) {
+        printf("\nCorreo invalido: Solo debe haber un '@'.\n");
+        return ingresarCorreo(msj);
+    }
+
+    std::string usuario = correo.substr(0, posAt); // Parte antes del '@'
+    std::string dominio = correo.substr(posAt + 1); // Parte después del '@'
+
+    // **Validar que antes del '@' solo haya letras, números, puntos o guiones bajos, sin comenzar con '.'**
+    if (usuario.empty() || usuario[0] == '.' || usuario.find("..") != std::string::npos) {
+        printf("\nCorreo invalido: La parte antes del '@' no puede empezar con '.' ni contener '..'.\n");
+        return ingresarCorreo(msj);
+    }
+
+    // **Validar que el dominio contenga al menos un punto (.)**
+    size_t posDot = dominio.find('.');
+    if (posDot == std::string::npos || posDot == 0 || posDot == dominio.length() - 1) {
+        printf("\nCorreo invalido: El dominio debe contener al menos un '.' y no puede empezar ni terminar con el.\n");
+        return ingresarCorreo(msj);
+    }
+
+    // **Validar que el dominio no tenga '..' consecutivos**
+    if (dominio.find("..") != std::string::npos) {
+        printf("\nCorreo invalido: El dominio no puede contener '..'.\n");
+        return ingresarCorreo(msj);
+    }
+
+    // **Validar el formato completo con una expresión regular**
+    std::regex formatoCorreo(R"(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)");
+    if (!std::regex_match(correo, formatoCorreo)) {
+        printf("\nCorreo invalido. Intente de nuevo.\n");
+        return ingresarCorreo(msj);
+    }
+
+    printf("\nCorreo ingresado correctamente.\n");
     return correo; // Devolver el correo válido
 }
+
 
 template <typename T>
 std::string Validaciones<T>::ingresarEspacioId(const char* msj) {

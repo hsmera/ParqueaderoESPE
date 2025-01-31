@@ -114,8 +114,8 @@ void AutosPermitidos::mostrarPropietarios() {
     archivoPropietarios.close();
 }
 
-// Agregar un nuevo auto permitido
 void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& propietario) {
+    // Verificar si la placa ya existe
     for (const auto& registro : registros) {
         if (registro.autoPermitido.placa == autoPermitido.placa) {
             cout << "El auto con placa " << autoPermitido.placa << " ya está registrado." << endl;
@@ -123,6 +123,13 @@ void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& 
         }
     }
 
+    // Verificar si la cédula ya está en la lista antes de agregar
+    if (existeCedula(propietario.cedula)) {
+        cout << "Error: La cedula " << propietario.cedula << " ya esta registrada y no se puede duplicar." << endl;
+        return;
+    }
+
+    // Si no hay duplicados, agregar el auto y propietario
     registros.emplace_back(autoPermitido, propietario);
 
     // Ordenar la lista después de agregar un nuevo auto (por placa)
@@ -135,6 +142,14 @@ void AutosPermitidos::agregarAuto(const Auto& autoPermitido, const Propietario& 
     cout << "Auto y propietario agregados correctamente." << endl;
 }
 
+bool AutosPermitidos::existeCedula(const string& cedula) {
+    for (const auto& registro : registros) {
+        if (registro.propietario.cedula == cedula) {
+            return true; // La cédula ya está registrada
+        }
+    }
+    return false; // No se encontró la cédula
+}
 
 // Buscar un auto por placa
 bool AutosPermitidos::buscarAuto(const string& placa) const {

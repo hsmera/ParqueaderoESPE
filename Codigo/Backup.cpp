@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include "Validaciones.h"
 
 using namespace std;
 namespace fs = filesystem;
@@ -84,6 +85,7 @@ void Backup::eliminarArchivo() {
 }
 
 void Backup::recuperarBackup() {
+    Validaciones<int> validador;
     string carpetaBase = "../backup";
 
     if (!fs::exists(carpetaBase) || fs::is_empty(carpetaBase)) {
@@ -103,9 +105,8 @@ void Backup::recuperarBackup() {
         }
     }
 
-    int seleccion;
-    cout << "Seleccione el numero de la carpeta a restaurar: ";
-    cin >> seleccion;
+    int seleccion = validador.ingresar("Seleccione el numero de la carpeta a restaurar: ", "entero");
+    cout << endl;
 
     if (seleccion < 1 || seleccion > carpetas.size()) {
         cout << "Selección invalida.\n";
@@ -115,7 +116,29 @@ void Backup::recuperarBackup() {
     string carpetaSeleccionada = carpetaBase + "/" + carpetas[seleccion - 1];
 
     for (const auto& archivo : fs::directory_iterator(carpetaSeleccionada)) {
-        fs::copy(archivo.path(), "../Codigo/" + archivo.path().filename().string(), fs::copy_options::overwrite_existing);
+        string destino = "../Codigo/" + archivo.path().filename().string();
+
+        // Verificar si el archivo ya existe en el destino
+        if (fs::exists(destino)) {
+            char respuesta;
+            cout << "El archivo '" << archivo.path().filename().string() << "' ya existe.\n";
+            cout << "Desea reemplazarlo? (S/N): ";
+            cin >> respuesta;
+
+            if (respuesta != 'S' && respuesta != 's') {
+                cout << "No se reemplazará el archivo. Continuando con el resto.\n";
+                continue; // Salta al siguiente archivo si el usuario no desea reemplazarlo
+            }else{
+                fs::remove(destino);
+            }
+        }
+
+        try {
+            fs::copy(archivo.path(), destino, fs::copy_options::overwrite_existing);
+            cout << "Archivo '" << archivo.path().filename().string() << "' restaurado.\n";
+        } catch (const fs::filesystem_error& e) {
+            cout << "Error al restaurar " << archivo.path().filename().string() << ": " << e.what() << endl;
+        }
     }
 
     cout << "Backup restaurado desde '" << carpetaSeleccionada << "' a '../Codigo/'.\n";
