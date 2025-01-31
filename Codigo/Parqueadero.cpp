@@ -130,7 +130,7 @@ void Parqueadero::mostrarEstado() const {
         if (esReferencia) {
             cout << "\033[33mEntrada \033[0m";  // Color verde
         } else {
-            cout << "         ";  // Espaciado normal para mantener alineación
+            cout << "        ";  // Espaciado normal para mantener alineación
         }
 
         // Primera columna
