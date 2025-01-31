@@ -23,8 +23,9 @@ public:
     time_t horaIngreso; // Tiempo de ingreso (0 si está libre)
     Nodo* siguiente;
     Nodo* anterior;
+    int distancia;
 
-    Nodo(const string& id);
+     Nodo(const string& _id, int _distancia); 
 
     void mostrarEstado() const;
 };

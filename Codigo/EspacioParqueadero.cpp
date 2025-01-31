@@ -11,8 +11,8 @@
 #include "EspacioParqueadero.h"
 #include "Nodo.h"
 
-Nodo* EspacioParqueadero::crearEspacio(const string& id) {
-    return new Nodo(id);
+Nodo* EspacioParqueadero::crearEspacio(const string& id, int distancia) {
+    return new Nodo(id, distancia);
 }
 
 void EspacioParqueadero::ocuparEspacio(Nodo* espacio, const string& placa) {

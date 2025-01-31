@@ -19,7 +19,7 @@ using namespace std;
 
 class EspacioParqueadero {
 public:
-    Nodo* crearEspacio(const string& id);
+    Nodo* crearEspacio(const string& id, int distancia);
     void ocuparEspacio(Nodo* espacio, const string& placa);
     void liberarEspacio(Nodo* espacio);
     string obtenerEstado(const Nodo* espacio) const;

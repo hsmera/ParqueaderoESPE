@@ -36,7 +36,8 @@ public:
     void mostrarEstado() const;
     bool estacionarAuto(const string& placa, string& espacioId);
     bool retirarAuto(const string& placa);
-    Nodo* buscarEspacioCercano();
+    Nodo* buscarEspacioMasCercano();
+    vector<Nodo*> convertirAArrayOrdenado();
 };
 
 #endif // PARQUEADERO_H
