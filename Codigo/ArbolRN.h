@@ -21,7 +21,8 @@ private:
     void recorridoInOrden(NodoRN* nodo, vector<NodoRN*>& nodos) const;
 
     NodoRN* buscarNodo(NodoRN* nodo, const string& placa) const;
-
+    void imprimirInOrden(NodoRN* nodo) const;
+    
 public:
     // Constructor
     ArbolRN();
@@ -33,6 +34,7 @@ public:
 
     // Recorrido
     vector<NodoRN*> obtenerInOrden() const;
+    void imprimirArbol() const;
 
     // Destructor
     ~ArbolRN();

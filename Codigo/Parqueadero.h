@@ -37,6 +37,7 @@ public:
     bool estacionarAuto(const string& placa, string& espacioId);
     bool retirarAuto(const string& placa);
     Nodo* buscarEspacioMasCercano();
+    Nodo* obtenerEspacioAleatorio();
     vector<Nodo*> convertirAArrayOrdenado();
 };
 

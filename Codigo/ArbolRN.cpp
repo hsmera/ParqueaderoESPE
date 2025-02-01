@@ -175,3 +175,25 @@ void ArbolRN::eliminarNodo(NodoRN* nodo) {
         delete nodo;
     }
 }
+
+void ArbolRN::imprimirArbol() const {
+    if (raiz == nulo) {
+        cout << "El árbol está vacío.\n";
+        return;
+    }
+
+    cout << "Árbol Rojo-Negro (In-Orden):\n";
+    imprimirInOrden(raiz);
+    cout << endl;
+}
+
+// Función auxiliar para imprimir en orden
+void ArbolRN::imprimirInOrden(NodoRN* nodo) const {
+    if (nodo != nulo) {
+        imprimirInOrden(nodo->izquierdo);
+        cout << "Placa: " << nodo->placa << " | Espacio: " << nodo->espacioId
+             << " | Ingreso: " << nodo->fechaHoraIngreso
+             << " | Color: " << (nodo->color ? "Rojo" : "Negro") << endl;
+        imprimirInOrden(nodo->derecho);
+    }
+}

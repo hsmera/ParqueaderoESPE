@@ -11,6 +11,10 @@
 #include "Parqueadero.h"
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <cstdlib>  // Para rand() y srand()
+#include <ctime>    // Para time()
+
 
 Parqueadero::Parqueadero(HistorialEstacionamiento *historial) : head(nullptr), historial(historial)
 {
@@ -159,7 +163,7 @@ bool Parqueadero::estacionarAuto(const string &placa, string &espacioId)
 {
     Nodo *espacioDisponible = nullptr;
 
-    // Verificar si la placa ya está en algún espacio
+    // Verificar si la placa ya está estacionada
     Nodo *temp = head;
     if (temp)
     {
@@ -175,48 +179,16 @@ bool Parqueadero::estacionarAuto(const string &placa, string &espacioId)
         } while (temp != head);
     }
 
-    if (espacioId.empty())
-    {
-        // Buscar el espacio más cercano con la nueva búsqueda binaria simulada
-        espacioDisponible = buscarEspacioMasCercano();
-    }
-    else
-    {
-        // Buscar el nodo correspondiente al espacioId
-        temp = head;
-        do
-        {
-            if (temp->id == espacioId)
-            {
-                if (!temp->ocupado)
-                {
-                    espacioDisponible = temp;
-                }
-                else
-                {
-                    cout << "El espacio " << espacioId << " ya esta ocupado.\n";
-                    return false;
-                }
-                break;
-            }
-            temp = temp->siguiente;
-        } while (temp != head);
-
-        if (!espacioDisponible)
-        {
-            cout << "El espacio " << espacioId << " no existe.\n";
-            return false;
-        }
-    }
-
+    // Buscar un espacio libre aleatoriamente
+    espacioDisponible = obtenerEspacioAleatorio();
+    
     if (espacioDisponible)
     {
         // Ocupar el espacio con la placa del vehículo
         manejadorEspacios.ocuparEspacio(espacioDisponible, placa);
-        // historial->registrarEntrada(placa, espacioDisponible->id);  // Registrar la entrada en el historial
         guardarEnArchivo(); // Guardar el estado después de la asignación
 
-        espacioId = espacioDisponible->id; // Actualizar espacioId con el ID asignado
+        espacioId = espacioDisponible->id; // Asignar el ID del espacio ocupado
         cout << "El vehiculo con placa " << placa << " fue estacionado en el espacio "
              << espacioDisponible->id << " (Distancia: " << espacioDisponible->distancia << " metros).\n";
         return true;
@@ -224,6 +196,36 @@ bool Parqueadero::estacionarAuto(const string &placa, string &espacioId)
 
     cout << "No hay espacios disponibles en este momento.\n";
     return false;
+}
+
+// Función para obtener un espacio libre aleatorio
+Nodo* Parqueadero::obtenerEspacioAleatorio()
+{
+    vector<Nodo*> espaciosLibres;
+    Nodo *temp = head;
+
+    if (!temp) return nullptr;
+
+    // Recorrer la lista para obtener los espacios disponibles
+    do
+    {
+        if (!temp->ocupado)
+        {
+            espaciosLibres.push_back(temp);
+        }
+        temp = temp->siguiente;
+    } while (temp != head);
+
+    // Si no hay espacios libres, retornar nullptr
+    if (espaciosLibres.empty()) return nullptr;
+
+    // Inicializar la semilla aleatoria
+    srand(time(0));
+
+    // Seleccionar un índice aleatorio
+    int index = rand() % espaciosLibres.size();
+
+    return espaciosLibres[index];
 }
 
 bool Parqueadero::retirarAuto(const string &placa)

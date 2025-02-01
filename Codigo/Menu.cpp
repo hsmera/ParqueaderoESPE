@@ -22,6 +22,7 @@
 #include <fstream>
 #include "BusquedaBinaria.h"
 #include "Backup.h"
+#include "ArbolRN.h"
 
 using namespace std;
 // Constructor: Inicializa el menú con las opciones disponibles
@@ -35,6 +36,7 @@ Menu::Menu(Parqueadero *p, HistorialEstacionamiento *h, AutosPermitidos *a)
         "Registrar auto permitido",
         "Eliminar auto permitido",
         "Mostrar autos permitidos",
+        "Imprimir arbol",
         "Opciones de Busqueda",
         "Ordenar autos permitidos",
         "Mostrar propietarios",
@@ -76,7 +78,6 @@ void Menu::ejecutarOpcion()
     {
         string placa, espacioId;
         Validaciones<string> validador;
-        Validaciones<char> validadorChar; 
 
         // Ingresar y validar la placa
         placa = validador.ingresarPlaca("Ingresa la placa del auto a estacionar (sin guiones): ");
@@ -92,25 +93,13 @@ void Menu::ejecutarOpcion()
         // Mostrar estado actual del parqueadero
         parqueadero->mostrarEstado();
 
-        // Preguntar si desea elegir un espacio específico o asignación automática
-        
-        char opcion = validadorChar.ingresar("Desea elegir un espacio especifico? (S/N): ", "char" );
-        cout <<endl;
+        // Estacionamiento automático
+        espacioId = ""; // Forzar asignación aleatoria
 
-        if (toupper(opcion) == 'S')
-        {
-            espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio a estacionarse: ");
-            cout << endl;
-        }
-        else 
-        {
-            espacioId = ""; // Forzar asignación automática
-        }
-
-        // Asignar el espacio y registrar la entrada en el menú
+        // Intentar estacionar el auto
         if (parqueadero->estacionarAuto(placa, espacioId))
         {
-            historial->registrarEntrada(placa, espacioId); // Registrar la entrada con el espacio correcto
+            historial->registrarEntrada(placa, espacioId); // Registrar la entrada con el espacio asignado
         }
         break;
     }
@@ -164,22 +153,28 @@ void Menu::ejecutarOpcion()
         autosPermitidos->mostrarAutos();
         break;
     case 6:
+    {
+        ArbolRN arbolRN;
+        arbolRN.imprimirArbol();      
+        break;
+    }
+    case 7:
         submenuBusquedas();
         break;
-    case 7: // Agregar caso para ordenar los autos permitidos
+    case 8: // Agregar caso para ordenar los autos permitidos
         mostrarMenuOrdenamiento(autosPermitidos->getRegistros());
         break;
-    case 8:
+    case 9:
         autosPermitidos->mostrarPropietarios();
         break;
-    case 9:
+    case 10:
         mostrarSubmenuHistorial();
         break;
-    case 10:
+    case 11:
         Backup backup;
         mostrarSubmenuBackup(backup);
         break;
-    case 11:
+    case 12:
         cout << "Saliendo del programa...\n";
         exit(0);
     default:
@@ -350,24 +345,26 @@ void Menu::submenuBusquedas()
                 // Llamar al método de HistorialEstacionamiento para mostrar autos en el rango de fechas
                 historial->mostrarAutosPorRangoFechas(fechaInicio, fechaFin);
             }
-            else if (seleccionSubmenu == 4) 
-            { 
+            else if (seleccionSubmenu == 4)
+            {
                 string espacioId, fechaInicio, fechaFin;
                 Validaciones<string> validador;
                 espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio: ");
-                cout<<endl;
+                cout << endl;
                 fechaInicio = validador.ingresarFecha("Ingrese la fecha de inicio (YYYY-MM-DD): ");
-                cout<<endl;
+                cout << endl;
                 fechaFin = validador.ingresarFecha("Ingrese la fecha de fin (YYYY-MM-DD): ");
                 cout << endl;
                 historial->buscarAutosEnEspacioPorRangoFechas(espacioId, fechaInicio, fechaFin);
-            }else if (seleccionSubmenu == 5) { // Buscar por duración
+            }
+            else if (seleccionSubmenu == 5)
+            { // Buscar por duración
                 string fecha, duracionMin, duracionMax;
                 Validaciones<string> validador;
                 fecha = validador.ingresarFecha("Ingrese la fecha de busqueda (YYYY-MM-DD): ");
-                cout<<endl;
+                cout << endl;
                 duracionMin = validador.ingresarDuracion("Ingrese la duracion minima (HH:MM): ");
-                cout<<endl;
+                cout << endl;
                 duracionMax = validador.ingresarDuracion("Ingrese la duracion maxima en (HH:MM): ");
                 cout << endl;
                 historial->mostrarAutosPorDuracionEnFecha(fecha, duracionMin, duracionMax);
@@ -641,7 +638,6 @@ void Menu::mostrarGuiaRapida()
 
     system("cls"); // Limpiar pantalla antes de regresar al menÃº principal
 }
-
 
 void Menu::ordenarAutosPermitidos()
 {
