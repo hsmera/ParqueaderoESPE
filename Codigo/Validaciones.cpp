@@ -571,3 +571,52 @@ std::string Validaciones<T>::ingresarPrefijo(const char *msj) {
 
     return std::string(cad); // Devolver el prefijo válido
 }
+
+template <typename T>
+std::string Validaciones<T>::ingresarDuracion(char *msj)
+{
+    char cad[6]; // Formato HH:MM (5 caracteres + '\0')
+    char c;
+    int i = 0;
+    printf("%s", msj);
+
+    while ((c = getch()) != 13) // Enter para finalizar
+    {
+        if ((isdigit(c) && (i != 2)) || (c == ':' && i == 2)) // Permitir números y ':' en la posición correcta
+        {
+            if (i < 5) // Limitar a 5 caracteres
+            {
+                printf("%c", c);
+                cad[i++] = c;
+            }
+        }
+        else if (c == 8) // Backspace para borrar
+        {
+            if (i > 0)
+            {
+                printf("\b \b");
+                i--;
+            }
+        }
+    }
+    cad[i] = '\0'; // Terminar la cadena
+
+    // Validar el formato (Debe tener exactamente 5 caracteres con ':' en la tercera posición)
+    if (i != 5 || cad[2] != ':')
+    {
+        printf("\nFormato inválido. Intente de nuevo.\n");
+        return ingresarDuracion(msj); // Llamar recursivamente en caso de error
+    }
+
+    // Validar que las horas estén en el rango 00-23 y los minutos en 00-59
+    int horas = std::stoi(std::string(cad, 2));
+    int minutos = std::stoi(std::string(cad + 3, 2));
+
+    if (horas < 0 || horas > 23 || minutos < 0 || minutos > 59)
+    {
+        printf("\nHora inválida. Intente de nuevo.\n");
+        return ingresarDuracion(msj); // Volver a pedir la entrada
+    }
+
+    return std::string(cad); // Devolver la duración válida
+}

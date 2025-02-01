@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 HistorialEstacionamiento::HistorialEstacionamiento() {
@@ -252,4 +253,122 @@ void HistorialEstacionamiento::mostrarAutosPorRangoFechas(const string& fechaIni
     if (!encontrado) {
         cout << "No se encontraron registros entre las fechas " << fechaInicio << " y " << fechaFin << "." << endl;
     }
+}
+
+void HistorialEstacionamiento::buscarAutosEnEspacioPorRangoFechas(const string& espacioId, const string& fechaInicio, const string& fechaFin) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    int izquierda = 0, derecha = registros.size() - 1, inicio = -1, fin = -1;
+    
+    // Búsqueda binaria para encontrar el primer nodo en el rango de fechas
+    while (izquierda <= derecha) {
+        int medio = izquierda + (derecha - izquierda) / 2;
+        string fechaIngreso = registros[medio]->fechaHoraIngreso.substr(0, 10);
+        
+        if (fechaIngreso >= fechaInicio) {
+            fin = medio;
+            derecha = medio - 1;
+        } else {
+            izquierda = medio + 1;
+        }
+    }
+    
+    izquierda = 0, derecha = registros.size() - 1;
+    
+    // Búsqueda binaria para encontrar el último nodo en el rango de fechas
+    while (izquierda <= derecha) {
+        int medio = izquierda + (derecha - izquierda) / 2;
+        string fechaIngreso = registros[medio]->fechaHoraIngreso.substr(0, 10);
+        
+        if (fechaIngreso <= fechaFin) {
+            inicio = medio;
+            izquierda = medio + 1;
+        } else {
+            derecha = medio - 1;
+        }
+    }
+    
+    if (fin == -1 || inicio == -1) {
+        cout << "No se encontraron autos en el rango de fechas." << endl;
+        return;
+    }
+    
+    cout << "Autos estacionados en el espacio " << espacioId << " entre " << fechaInicio << " y " << fechaFin << ":" << endl;
+    cout << "------------------------------------------------------" << endl;
+    bool encontrado = false;
+    
+    for (int i = fin; i <= inicio; ++i) {
+        if (registros[i]->espacioId == espacioId) {
+            encontrado = true;
+            cout << "Placa: " << registros[i]->placa
+                 << ", Ingreso: " << registros[i]->fechaHoraIngreso
+                 << ", Salida: " << (registros[i]->fechaHoraSalida.empty() ? "Aun en el parqueadero" : registros[i]->fechaHoraSalida)
+                 << endl;
+        }
+    }
+    
+    if (!encontrado) {
+        cout << "No se encontraron registros en el espacio " << espacioId << " para el rango de fechas." << endl;
+    }
+}
+
+// Función para calcular la duración en minutos de una estancia
+void HistorialEstacionamiento::mostrarAutosPorDuracionEnFecha(const string& fecha, const string& duracionMin, const string& duracionMax) const {
+    vector<NodoRN*> registros = historial.obtenerInOrden();
+    bool encontrado = false;
+
+    cout << "Autos estacionados el " << fecha << " con duracion entre " << duracionMin << " y " << duracionMax << ":\n";
+    cout << "------------------------------------------------------\n";
+
+    for (const auto& registro : registros) {
+        string fechaIngreso = registro->fechaHoraIngreso.substr(0, 10);
+        if (fechaIngreso == fecha && !registro->fechaHoraSalida.empty()) {
+            string duracion = calcularDuracion(registro->fechaHoraIngreso, registro->fechaHoraSalida);
+
+            if (estaEnRangoDuracion(duracion, duracionMin, duracionMax)) {
+                cout << "Placa: " << registro->placa
+                     << ", Espacio: " << registro->espacioId
+                     << ", Ingreso: " << registro->fechaHoraIngreso
+                     << ", Salida: " << registro->fechaHoraSalida
+                     << ", Duracion: " << duracion << "\n";
+                encontrado = true;
+            }
+        }
+    }
+
+    if (!encontrado) {
+        cout << "No se encontraron autos en la fecha " << fecha << " con la duracion especificada.\n";
+    }
+}
+
+string HistorialEstacionamiento::calcularDuracion(const string& ingreso, const string& salida) const {
+    std::tm tIngreso = {}, tSalida = {};
+    std::istringstream ssIngreso(ingreso), ssSalida(salida);
+
+    ssIngreso >> std::get_time(&tIngreso, "%Y-%m-%d %H:%M:%S");
+    ssSalida >> std::get_time(&tSalida, "%Y-%m-%d %H:%M:%S");
+
+    if (ssIngreso.fail() || ssSalida.fail()) {
+        return "Error";
+    }
+
+    std::time_t timeIngreso = std::mktime(&tIngreso);
+    std::time_t timeSalida = std::mktime(&tSalida);
+
+    if (timeIngreso == -1 || timeSalida == -1) {
+        return "Error";
+    }
+
+    int segundos = static_cast<int>(difftime(timeSalida, timeIngreso));
+    int horas = segundos / 3600;
+    int minutos = (segundos % 3600) / 60;
+
+    std::ostringstream duracion;
+    duracion << std::setw(2) << std::setfill('0') << horas << ":"
+             << std::setw(2) << std::setfill('0') << minutos;
+    
+    return duracion.str(); // Devuelve HH:MM
+}
+
+bool HistorialEstacionamiento::estaEnRangoDuracion(const string& duracion, const string& duracionMin, const string& duracionMax) const {
+    return duracion >= duracionMin && duracion <= duracionMax;
 }

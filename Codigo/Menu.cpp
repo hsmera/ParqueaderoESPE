@@ -263,6 +263,8 @@ void Menu::submenuBusquedas()
         "Buscar autos permitidos por prefijo de placa",  // Opción nueva
         "Buscar el primer ingreso por fecha especifica", // Opción nueva
         "Buscar autos por rango de fechas",              // Opción nueva
+        "Buscar autos en un espacio por rango de fechas",
+        "Buscar autos por duración de estacionamiento en una fecha",
         "Regresar al menu principal"};
 
     int seleccionSubmenu = 0;
@@ -311,7 +313,7 @@ void Menu::submenuBusquedas()
                 }
                 else
                 {
-                    cout << "El auto con placa " << placa << " no está permitido.\n";
+                    cout << "El auto con placa " << placa << " no esta permitido.\n";
                 }
             }
             else if (seleccionSubmenu == 1)
@@ -348,7 +350,29 @@ void Menu::submenuBusquedas()
                 // Llamar al método de HistorialEstacionamiento para mostrar autos en el rango de fechas
                 historial->mostrarAutosPorRangoFechas(fechaInicio, fechaFin);
             }
-            else if (seleccionSubmenu == 4)
+            else if (seleccionSubmenu == 4) 
+            { 
+                string espacioId, fechaInicio, fechaFin;
+                Validaciones<string> validador;
+                espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio: ");
+                cout<<endl;
+                fechaInicio = validador.ingresarFecha("Ingrese la fecha de inicio (YYYY-MM-DD): ");
+                cout<<endl;
+                fechaFin = validador.ingresarFecha("Ingrese la fecha de fin (YYYY-MM-DD): ");
+                cout << endl;
+                historial->buscarAutosEnEspacioPorRangoFechas(espacioId, fechaInicio, fechaFin);
+            }else if (seleccionSubmenu == 5) { // Buscar por duración
+                string fecha, duracionMin, duracionMax;
+                Validaciones<string> validador;
+                fecha = validador.ingresarFecha("Ingrese la fecha de busqueda (YYYY-MM-DD): ");
+                cout<<endl;
+                duracionMin = validador.ingresarDuracion("Ingrese la duracion minima (HH:MM): ");
+                cout<<endl;
+                duracionMax = validador.ingresarDuracion("Ingrese la duracion maxima en (HH:MM): ");
+                cout << endl;
+                historial->mostrarAutosPorDuracionEnFecha(fecha, duracionMin, duracionMax);
+            }
+            else if (seleccionSubmenu == 6)
             {
                 // Opción: Regresar al menú principal
                 break;

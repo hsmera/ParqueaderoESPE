@@ -18,6 +18,8 @@
 #include <sstream>
 #include <iostream>
 #include <ctime>
+#include <iomanip>
+
 using namespace std;
 
 class HistorialEstacionamiento {
@@ -41,6 +43,10 @@ public:
     void mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const;
     void mostrarPrimerIngresoPorFecha(const string& fecha) const;
     void mostrarAutosPorRangoFechas(const string& fechaInicio, const string& fechaFin) const;
+    void buscarAutosEnEspacioPorRangoFechas(const string& espacioId, const string& fechaInicio, const string& fechaFin) const ;
+    void mostrarAutosPorDuracionEnFecha(const string& fecha, const string& duracionMin, const string& duracionMax) const;
+    string calcularDuracion(const string& ingreso, const string& salida) const;
+    bool estaEnRangoDuracion(const string& duracion, const string& duracionMin, const string& duracionMax) const;
 
 };
 
