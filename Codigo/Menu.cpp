@@ -265,6 +265,8 @@ void Menu::submenuBusquedas()
         "Buscar autos por rango de fechas",              // Opción nueva
         "Buscar autos en un espacio por rango de fechas",
         "Buscar autos por duración de estacionamiento en una fecha",
+        "Buscar espacio más y menos ocupado por número de veces",
+        "Buscar espacio más y menos ocupado por duración",
         "Regresar al menu principal"};
 
     int seleccionSubmenu = 0;
@@ -374,7 +376,19 @@ void Menu::submenuBusquedas()
                 cout << endl;
                 historial->mostrarAutosPorDuracionEnFecha(fecha, duracionMin, duracionMax);
             }
-            else if (seleccionSubmenu == 6)
+            else if (seleccionSubmenu == 6) { 
+                // Buscar espacio más y menos ocupado por número de veces
+                historial->buscarEspacioMasMenosOcupadoPorVeces();
+            } 
+            else if (seleccionSubmenu == 7) { 
+                // Buscar espacio más y menos ocupado por duración
+                historial->buscarEspacioMasMenosOcupadoPorDuracion();
+            }
+            else if (seleccionSubmenu == 8) { 
+                // Opción: Regresar al menú principal
+                break;
+            }
+            else if (seleccionSubmenu == 9)
             {
                 // Opción: Regresar al menú principal
                 break;
