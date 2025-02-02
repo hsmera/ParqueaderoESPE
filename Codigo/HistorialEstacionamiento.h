@@ -47,9 +47,8 @@ public:
     void mostrarAutosPorDuracionEnFecha(const string& fecha, const string& duracionMin, const string& duracionMax) const;
     string calcularDuracion(const string& ingreso, const string& salida) const;
     bool estaEnRangoDuracion(const string& duracion, const string& duracionMin, const string& duracionMax) const;
-    void buscarEspacioMasMenosOcupadoPorVeces() const;
-    void buscarEspacioMasMenosOcupadoPorDuracion() const;
-
+    void mostrarEspacioMasMenosTiempoOcupado() const ;
+    void mostrarEspacioMasMenosOcupado() const;
     void imprimirArbol();
     void mostrarRecorridos() const;
 };

@@ -19,7 +19,7 @@
 #include <iostream>
 #include <conio.h>
 #include <list>
-#include "Backup.h"
+#include <map>
 
 class Menu {
 private:
@@ -34,7 +34,6 @@ private:
     void mostrarSubmenuHistorial();
     void ordenarAutosPermitidos();
     void mostrarMenuOrdenamiento(std::list<Registro>& registros);  // Modificado
-    void mostrarSubmenuBackup(Backup& backup);
 
 
 public:

@@ -377,54 +377,92 @@ bool HistorialEstacionamiento::estaEnRangoDuracion(const string& duracion, const
     return duracion >= duracionMin && duracion <= duracionMax;
 }
 
-void HistorialEstacionamiento::buscarEspacioMasMenosOcupadoPorVeces() const {
-    unordered_map<string, int> conteoEspacios;
+int convertirDuracionAMinutos(const string& duracion) {
+    int horas, minutos;
+    char separador;
+
+    istringstream ss(duracion);
+    ss >> horas >> separador >> minutos;
+
+    if (ss.fail() || separador != ':') {
+        return 0; // Si hay error, devolvemos 0 minutos
+    }
+
+    return (horas * 60) + minutos; // Convertimos a minutos
+}
+
+void HistorialEstacionamiento::mostrarEspacioMasMenosOcupado() const {
+    map<string, int> conteoEspacios;  // EspacioId -> cantidad de veces ocupado
+
     vector<NodoRN*> registros = historial.obtenerInOrden();
 
+    // Contar cuántas veces se usó cada espacio
     for (const auto& registro : registros) {
         conteoEspacios[registro->espacioId]++;
     }
 
     if (conteoEspacios.empty()) {
-        cout << "No hay registros en el historial." << endl;
+        cout << "No hay registros de estacionamiento." << endl;
         return;
     }
 
-    auto maxIt = max_element(conteoEspacios.begin(), conteoEspacios.end(),
-                             [](const auto& a, const auto& b) { return a.second < b.second; });
+    // Convertir a vector y ordenar
+    vector<pair<string, int>> listaEspacios(conteoEspacios.begin(), conteoEspacios.end());
+    sort(listaEspacios.begin(), listaEspacios.end(),
+         [](const pair<string, int>& a, const pair<string, int>& b) {
+             return a.second < b.second; // Orden ascendente
+         });
 
-    auto minIt = min_element(conteoEspacios.begin(), conteoEspacios.end(),
-                             [](const auto& a, const auto& b) { return a.second < b.second; });
-
-    cout << "Espacio más ocupado: " << maxIt->first << " con " << maxIt->second << " usos." << endl;
-    cout << "Espacio menos ocupado: " << minIt->first << " con " << minIt->second << " usos." << endl;
+    // Espacio menos y más ocupado
+    cout << "Espacio de Estacionamiento Mas y Menos Utilizado" << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << "Espacio mas ocupado:    [ID: " << listaEspacios.back().first
+         << "] -> " << listaEspacios.back().second << " veces" << endl;
+    cout << "Espacio menos ocupado:  [ID: " << listaEspacios.front().first
+         << "] -> " << listaEspacios.front().second << " veces" << endl;
 }
 
-void HistorialEstacionamiento::buscarEspacioMasMenosOcupadoPorDuracion() const {
-    unordered_map<string, int> duracionEspacios;
+void HistorialEstacionamiento::mostrarEspacioMasMenosTiempoOcupado() const {
+    map<string, int> duracionEspacios;  // EspacioId -> tiempo total en minutos
+
     vector<NodoRN*> registros = historial.obtenerInOrden();
 
+    // Calcular tiempo total de ocupación por espacio
     for (const auto& registro : registros) {
-        if (!registro->fechaHoraSalida.empty()) {
-            string duracionStr = calcularDuracion(registro->fechaHoraIngreso, registro->fechaHoraSalida);
-            int minutos = stoi(duracionStr.substr(0, 2)) * 60 + stoi(duracionStr.substr(3, 2));
-            duracionEspacios[registro->espacioId] += minutos;
+        if (!registro->fechaHoraSalida.empty()) { // Solo contar si tiene salida
+            string duracion = calcularDuracion(registro->fechaHoraIngreso, registro->fechaHoraSalida);
+            duracionEspacios[registro->espacioId] += convertirDuracionAMinutos(duracion);
         }
     }
 
     if (duracionEspacios.empty()) {
-        cout << "No hay registros con salidas registradas." << endl;
+        cout << "No hay registros con tiempos de salida." << endl;
         return;
     }
 
-    auto maxIt = max_element(duracionEspacios.begin(), duracionEspacios.end(),
-                             [](const auto& a, const auto& b) { return a.second < b.second; });
+    // Convertir a vector y ordenar
+    vector<pair<string, int>> listaDuracion(duracionEspacios.begin(), duracionEspacios.end());
+    sort(listaDuracion.begin(), listaDuracion.end(),
+         [](const pair<string, int>& a, const pair<string, int>& b) {
+             return a.second < b.second; // Orden ascendente
+         });
 
-    auto minIt = min_element(duracionEspacios.begin(), duracionEspacios.end(),
-                             [](const auto& a, const auto& b) { return a.second < b.second; });
+    // Convertir minutos a formato HH:MM
+    auto formatearTiempo = [](int minutos) {
+        int horas = minutos / 60;
+        int min = minutos % 60;
+        ostringstream oss;
+        oss << horas << " horas y " << min << " minutos";
+        return oss.str();
+    };
 
-    cout << "Espacio con mayor tiempo de uso: " << maxIt->first << " con " << maxIt->second << " minutos." << endl;
-    cout << "Espacio con menor tiempo de uso: " << minIt->first << " con " << minIt->second << " minutos." << endl;
+    // Espacio con mayor y menor tiempo de uso
+    cout << " Espacios con Mayor y Menor Duracion de Uso " << endl;
+    cout << "-------------------------------------------------" << endl;
+    cout << " Espacio con mayor tiempo de uso:    [ID: " << listaDuracion.back().first
+         << "]  ->  " << formatearTiempo(listaDuracion.back().second) << endl;
+    cout << " Espacio con menor tiempo de uso:    [ID: " << listaDuracion.front().first
+         << "]  ->  " << formatearTiempo(listaDuracion.front().second) << endl;
 }
 
 void HistorialEstacionamiento::imprimirArbol() {
