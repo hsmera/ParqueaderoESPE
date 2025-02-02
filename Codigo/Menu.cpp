@@ -37,6 +37,7 @@ Menu::Menu(Parqueadero *p, HistorialEstacionamiento *h, AutosPermitidos *a)
         "Eliminar auto permitido",
         "Mostrar autos permitidos",
         "Imprimir arbol",
+        "Mostrar Recorridos",
         "Opciones de Busqueda",
         "Ordenar autos permitidos",
         "Mostrar propietarios",
@@ -154,27 +155,31 @@ void Menu::ejecutarOpcion()
         break;
     case 6:
     {
-        ArbolRN arbolRN;
-        arbolRN.imprimirArbol();      
+        historial->imprimirArbol();
         break;
     }
     case 7:
+    {
+        historial->mostrarRecorridos();
+        break;
+    }
+    case 8:
         submenuBusquedas();
         break;
-    case 8: // Agregar caso para ordenar los autos permitidos
+    case 9: // Agregar caso para ordenar los autos permitidos
         mostrarMenuOrdenamiento(autosPermitidos->getRegistros());
         break;
-    case 9:
+    case 10:
         autosPermitidos->mostrarPropietarios();
         break;
-    case 10:
+    case 11:
         mostrarSubmenuHistorial();
         break;
-    case 11:
+    case 12:
         Backup backup;
         mostrarSubmenuBackup(backup);
         break;
-    case 12:
+    case 13:
         cout << "Saliendo del programa...\n";
         exit(0);
     default:

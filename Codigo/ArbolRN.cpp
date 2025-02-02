@@ -1,4 +1,16 @@
 #include "ArbolRN.h"
+#include <iostream>
+#include <queue>  // Para recorrido por niveles
+#include <iomanip>  // Para formato de impresión
+#include <cmath>
+#include <vector>
+
+// Definición de colores para la consola
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define WHITE   "\033[37m"
+
+using namespace std;
 
 // Constructor: inicializa el árbol con un nodo nulo
 ArbolRN::ArbolRN() {
@@ -196,4 +208,127 @@ void ArbolRN::imprimirInOrden(NodoRN* nodo) const {
              << " | Color: " << (nodo->color ? "Rojo" : "Negro") << endl;
         imprimirInOrden(nodo->derecho);
     }
+}
+
+void ArbolRN::imprimirArbolVertical() const {
+    if (raiz == nulo) {
+        cout << "El árbol está vacío.\n";
+        return;
+    }
+
+    // Cola para el recorrido por niveles
+    queue<pair<NodoRN*, int>> cola;
+    cola.push({raiz, 0});  // Nodo con su nivel
+
+    // Variables para determinar la altura máxima del árbol
+    int altura = 0;
+    while (!cola.empty()) {
+        NodoRN* actual = cola.front().first;
+        int nivel = cola.front().second;
+        cola.pop();
+
+        altura = max(altura, nivel);  // Actualizar la altura máxima
+
+        if (actual->izquierdo != nulo) cola.push({actual->izquierdo, nivel + 1});
+        if (actual->derecho != nulo) cola.push({actual->derecho, nivel + 1});
+    }
+
+    // Depuración: Mostrar la altura del árbol
+    cout << "Altura del árbol: " << altura << endl;
+
+    // Cola para la impresión
+    queue<pair<NodoRN*, int>> colaImpresion;
+    cola.push({raiz, 0});  // Nodo raíz
+
+    // Espaciado fijo entre nodos
+    int espacioBase = 1;  // Reducido a 1 para más cercanía
+
+    // Recorrer el árbol nivel por nivel
+    for (int nivel = 0; nivel <= altura; ++nivel) {
+        // Imprimir el nivel actual
+        cout << "Nivel " << nivel << ": ";
+
+        int tamanoNivel = cola.size();
+
+        // Ajustar el espaciado entre nodos en niveles más profundos
+        int nivelEspaciado = espacioBase * (altura - nivel + 1);  // Menos espaciado a medida que bajamos
+
+        while (tamanoNivel > 0) {
+            pair<NodoRN*, int> nodoNivel = cola.front();
+            cola.pop();
+
+            NodoRN* actual = nodoNivel.first;
+            int nivelNodo = nodoNivel.second;
+
+            if (nivelNodo == nivel) {
+                // Si estamos en el primer nivel (raíz), colocarla centrada
+                if (nivel == 0) {
+                    cout << setw(altura * 2) << (actual->color ? RED : WHITE) << actual->espacioId << RESET;
+                } else {
+                    // Imprimir el nodo con color y espaciado
+                    cout << setw(nivelEspaciado) << (actual->color ? RED : WHITE) << actual->espacioId << RESET;
+                }
+            }
+
+            // Agregar los hijos a la cola si no son nulos
+            if (actual->izquierdo != nulo) cola.push({actual->izquierdo, nivelNodo + 1});
+            if (actual->derecho != nulo) cola.push({actual->derecho, nivelNodo + 1});
+
+            tamanoNivel--;
+        }
+        cout << endl; // Nueva línea para el siguiente nivel
+    }
+}
+
+void ArbolRN::recorridoPreorden(NodoRN* nodo) const {
+    if (nodo == nulo) return;
+    
+    // Mostrar el nodo actual
+    cout << "(" << (nodo->color ? RED : WHITE) << nodo->espacioId << RESET << ") - ";
+    
+    // Recorrer primero el subárbol izquierdo
+    recorridoPreorden(nodo->izquierdo);
+    
+    // Luego el subárbol derecho
+    recorridoPreorden(nodo->derecho);
+}
+
+void ArbolRN::recorridoInorden(NodoRN* nodo) const {
+    if (nodo == nulo) return;
+    
+    // Recorrer primero el subárbol izquierdo
+    recorridoInorden(nodo->izquierdo);
+    
+    // Mostrar el nodo actual
+    cout << "(" << (nodo->color ? RED : WHITE) << nodo->espacioId << RESET << ") - ";
+    
+    // Luego el subárbol derecho
+    recorridoInorden(nodo->derecho);
+}
+
+void ArbolRN::recorridoPostorden(NodoRN* nodo) const {
+    if (nodo == nulo) return;
+    
+    // Recorrer primero el subárbol izquierdo
+    recorridoPostorden(nodo->izquierdo);
+    
+    // Luego el subárbol derecho
+    recorridoPostorden(nodo->derecho);
+    
+    // Mostrar el nodo actual
+    cout << "(" << (nodo->color ? RED : WHITE) << nodo->espacioId << RESET << ") - ";
+}
+
+void ArbolRN::mostrarRecorridos() const {
+    cout << "\nRecorrido Preorden: ";
+    recorridoPreorden(raiz);
+    cout << "\n";
+    
+    cout << "\nRecorrido Inorden: ";
+    recorridoInorden(raiz);
+    cout << "\n";
+    
+    cout << "\nRecorrido Postorden: ";
+    recorridoPostorden(raiz);
+    cout << "\n";
 }

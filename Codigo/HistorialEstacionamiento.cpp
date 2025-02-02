@@ -372,3 +372,11 @@ string HistorialEstacionamiento::calcularDuracion(const string& ingreso, const s
 bool HistorialEstacionamiento::estaEnRangoDuracion(const string& duracion, const string& duracionMin, const string& duracionMax) const {
     return duracion >= duracionMin && duracion <= duracionMax;
 }
+
+void HistorialEstacionamiento::imprimirArbol() {
+    historial.imprimirArbolVertical();  // Si es puntero: arbol->imprimirArbol();
+}
+
+void HistorialEstacionamiento::mostrarRecorridos() const {
+    historial.mostrarRecorridos();
+}

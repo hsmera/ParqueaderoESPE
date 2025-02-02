@@ -35,7 +35,12 @@ public:
     // Recorrido
     vector<NodoRN*> obtenerInOrden() const;
     void imprimirArbol() const;
-
+    void imprimirArbolVertical() const;
+    void recorridoPreorden(NodoRN* nodo) const;
+    void recorridoInorden(NodoRN* nodo) const;
+    void recorridoPostorden(NodoRN* nodo) const;
+    void mostrarRecorridos() const;
+    
     // Destructor
     ~ArbolRN();
 };
