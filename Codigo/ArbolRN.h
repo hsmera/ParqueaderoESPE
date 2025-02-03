@@ -6,6 +6,8 @@
 #include <vector>
 using namespace std;
 
+enum Color { ROJO, NEGRO };
+
 class ArbolRN {
 private:
     NodoRN* raiz;             // Raíz del árbol
@@ -31,6 +33,7 @@ public:
     void insertar(const string& placa, const string& espacioId, const string& fechaHoraIngreso, const string& fechaHoraSalida = "");
     void eliminar(const string& placa);
     NodoRN* buscar(const string& placa) const;
+    NodoRN* buscarNodoID(NodoRN* nodo, const string& espacioId) const;
 
     // Recorrido
     vector<NodoRN*> obtenerInOrden() const;
@@ -40,7 +43,11 @@ public:
     void recorridoInorden(NodoRN* nodo) const;
     void recorridoPostorden(NodoRN* nodo) const;
     void mostrarRecorridos() const;
-    
+    int obtenerAltura(NodoRN* nodo) const;
+    NodoRN* obtenerRaiz();
+    int obtenerAlturaNegra(NodoRN* nodo) const;
+    int obtenerProfundidad(NodoRN* nodo);
+
     // Destructor
     ~ArbolRN();
 };

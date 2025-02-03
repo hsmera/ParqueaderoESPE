@@ -332,3 +332,58 @@ void ArbolRN::mostrarRecorridos() const {
     recorridoPostorden(raiz);
     cout << "\n";
 }
+
+NodoRN* ArbolRN::obtenerRaiz() {
+    return raiz;
+}
+
+//  Método para obtener la altura total del árbol
+int ArbolRN::obtenerAltura(NodoRN* nodo) const {
+    if (nodo == nullptr || nodo == nulo) {  // Los nodos nulos tienen altura 0
+        return 0;
+    }
+    return max(obtenerAltura(nodo->izquierdo), obtenerAltura(nodo->derecho)) + 1;
+}
+
+//  Método para calcular la altura negra del árbol (nodos negros en el camino más largo)
+int ArbolRN::obtenerAlturaNegra(NodoRN* nodo) const {
+    if (nodo == nullptr || nodo == nulo) {  // Los nodos nulos tienen altura negra 0
+        return 0;
+    }
+    int alturaIzq = obtenerAlturaNegra(nodo->izquierdo);
+    int alturaDer = obtenerAlturaNegra(nodo->derecho);
+
+    // Solo contamos los nodos negros en la altura negra
+    if (nodo->color == NEGRO) {
+        return max(alturaIzq, alturaDer) + 1;
+    } else {
+        return max(alturaIzq, alturaDer);
+    }
+}
+
+int ArbolRN::obtenerProfundidad(NodoRN* nodo) {
+    if (nodo == nullptr || nodo == raiz) {
+        return 0;  // La raíz tiene profundidad 0
+    }
+    return 1 + obtenerProfundidad(nodo->padre);  // Sumar 1 en cada nivel hacia arriba
+}
+
+NodoRN* ArbolRN::buscarNodoID(NodoRN* nodo, const string& espacioId) const {
+    // Si el nodo es nulo, no se encontró el espacioId
+    if (nodo == nullptr) {
+        return nullptr;
+    }
+
+    // Si el nodo actual contiene el espacioId, retorna el nodo
+    if (nodo->espacioId == espacioId) {
+        return nodo;
+    }
+
+    // Si el espacioId es menor que el del nodo actual, busca en el subárbol izquierdo
+    if (espacioId < nodo->espacioId) {
+        return buscarNodo(nodo->izquierdo, espacioId);
+    }
+
+    // Si el espacioId es mayor que el del nodo actual, busca en el subárbol derecho
+    return buscarNodo(nodo->derecho, espacioId);
+}

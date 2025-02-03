@@ -21,6 +21,7 @@
 #include <string>
 #include <fstream>
 #include "BusquedaBinaria.h"
+#include "Backup.h"
 #include "ArbolRN.h"
 
 using namespace std;
@@ -37,10 +38,13 @@ Menu::Menu(Parqueadero *p, HistorialEstacionamiento *h, AutosPermitidos *a)
         "Mostrar autos permitidos",
         "Imprimir arbol",
         "Mostrar Recorridos",
+        "Mostrar altura del arbol y altura de nodos negros",
+        "Mostrar Profundidad",
         "Opciones de Busqueda",
         "Ordenar autos permitidos",
         "Mostrar propietarios",
         "Mostrar historial de estacionamientos",
+        "Opciones de Backup",
         "Salir"};
 }
 
@@ -162,18 +166,52 @@ void Menu::ejecutarOpcion()
         break;
     }
     case 8:
+    {
+        NodoRN *raiz = historial->obtenerRaiz(); //
+        int alturaTotal = historial->obtenerAltura(raiz);
+        int alturaNegra = historial->obtenerAlturaNegra(raiz);
+
+        cout << "Altura total del arbol: " << alturaTotal << endl;
+        cout << "Altura de nodos negros del arbol: " << alturaNegra << endl;
+        break;
+    }
+    case 9:
+    {
+        string espacioId;
+        Validaciones<string> validador;
+        espacioId = validador.ingresarEspacioId("Ingrese el ID del espacio de estacionamiento: ");
+        cout <<endl;
+
+        NodoRN *raiz = historial->obtenerRaiz();
+        NodoRN *nodo = historial->buscarNodoID(raiz,espacioId); // Buscar nodo por espacioId
+        if (nodo)
+        {
+            int profundidad = historial->obtenerProfundidad(nodo);
+            cout << "La profundidad del nodo con ID de estacionamiento " << espacioId << " es: " << profundidad << endl;
+        }
+        else
+        {
+            cout << "Espacio de estacionamiento no encontrado." << endl;
+        }
+        break;
+    }
+    case 10:
         submenuBusquedas();
         break;
-    case 9: // Agregar caso para ordenar los autos permitidos
+    case 11: // Agregar caso para ordenar los autos permitidos
         mostrarMenuOrdenamiento(autosPermitidos->getRegistros());
         break;
-    case 10:
+    case 12:
         autosPermitidos->mostrarPropietarios();
         break;
-    case 11:
+    case 13:
         mostrarSubmenuHistorial();
         break;
-    case 12:
+    case 14:
+        Backup backup;
+        mostrarSubmenuBackup(backup);
+        break;
+    case 15:
         cout << "Saliendo del programa...\n";
         exit(0);
     default:
@@ -181,6 +219,72 @@ void Menu::ejecutarOpcion()
         break;
     }
     system("pause");
+}
+
+void Menu::mostrarSubmenuBackup(Backup &backup)
+{
+    vector<string> opcionesBackup = {
+        "Realizar Backup de todos los archivos",
+        "Realizar Backup de un archivo especifico",
+        "Eliminar un archivo",
+        "Recuperar un Backup",
+        "Regresar al menu principal"};
+
+    int seleccionSubmenu = 0;
+
+    while (true)
+    {
+        system("cls");
+        cout << "\nOpciones de Backup\n";
+        cout << "-----------------------\n";
+
+        for (int i = 0; i < opcionesBackup.size(); i++)
+        {
+            if (i == seleccionSubmenu)
+            {
+                cout << " > " << opcionesBackup[i] << " <\n";
+            }
+            else
+            {
+                cout << "   " << opcionesBackup[i] << "\n";
+            }
+        }
+
+        char tecla = _getch();
+        if (tecla == 72)
+        { // Flecha arriba
+            seleccionSubmenu = (seleccionSubmenu - 1 + opcionesBackup.size()) % opcionesBackup.size();
+        }
+        else if (tecla == 80)
+        { // Flecha abajo
+            seleccionSubmenu = (seleccionSubmenu + 1) % opcionesBackup.size();
+        }
+        else if (tecla == '\r')
+        { // Enter
+            system("cls");
+            if (seleccionSubmenu == 0)
+            {
+                backup.realizarBackupTodos();
+            }
+            else if (seleccionSubmenu == 1)
+            {
+                backup.realizarBackupEspecifico();
+            }
+            else if (seleccionSubmenu == 2)
+            {
+                backup.eliminarArchivo();
+            }
+            else if (seleccionSubmenu == 3)
+            {
+                backup.recuperarBackup();
+            }
+            else if (seleccionSubmenu == 4)
+            {
+                break; // Regresar al menú principal
+            }
+            system("pause");
+        }
+    }
 }
 
 // Mostrar submenú de autos permitidos
@@ -192,7 +296,7 @@ void Menu::submenuBusquedas()
         "Buscar el primer ingreso por fecha especifica", // Opción nueva
         "Buscar autos por rango de fechas",              // Opción nueva
         "Buscar autos en un espacio por rango de fechas",
-        "Buscar autos por duracion de estacionamiento en una fecha",
+        "Buscar autos por duración de estacionamiento en una fecha",
         "Buscar espacio mas y menos ocupado por numero de veces",
         "Buscar espacio mas y menos ocupado por duracion",
         "Regresar al menu principal"};
@@ -304,10 +408,14 @@ void Menu::submenuBusquedas()
                 cout << endl;
                 historial->mostrarAutosPorDuracionEnFecha(fecha, duracionMin, duracionMax);
             }
-            else if (seleccionSubmenu == 6) { // Buscar espacio más y menos ocupado
+            else if (seleccionSubmenu == 6)
+            {
+                // Opción: Buscar espacio mas y menos ocupado por numero de veces
                 historial->mostrarEspacioMasMenosOcupado();
-            } 
-            else if (seleccionSubmenu == 7) { // Buscar espacio con mayor y menor tiempo de uso
+            }
+            else if (seleccionSubmenu == 7)
+            {
+                // Opción: Buscar espacio mas y menos ocupado por duracion
                 historial->mostrarEspacioMasMenosTiempoOcupado();
             }
             else if (seleccionSubmenu == 8)

@@ -17,6 +17,10 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <ctime>
+#include "ArbolRN.h"
+#include "NodoRN.h"
+
 using namespace std;
 
 HistorialEstacionamiento::HistorialEstacionamiento() {
@@ -472,3 +476,24 @@ void HistorialEstacionamiento::imprimirArbol() {
 void HistorialEstacionamiento::mostrarRecorridos() const {
     historial.mostrarRecorridos();
 }
+
+int HistorialEstacionamiento::obtenerAltura(NodoRN* nodo) const{
+    return historial.obtenerAltura(nodo);
+}
+
+int HistorialEstacionamiento::obtenerAlturaNegra(NodoRN* nodo) const{
+    return historial.obtenerAlturaNegra(nodo);
+}
+
+NodoRN* HistorialEstacionamiento::obtenerRaiz(){
+    return historial.obtenerRaiz();
+}
+
+int HistorialEstacionamiento::obtenerProfundidad(NodoRN* nodo){
+    return historial.obtenerProfundidad(nodo);
+}
+
+NodoRN* HistorialEstacionamiento::buscarNodoID(NodoRN* nodo, const string& espacioId) const{
+    return historial.buscarNodoID(nodo, espacioId);
+}
+

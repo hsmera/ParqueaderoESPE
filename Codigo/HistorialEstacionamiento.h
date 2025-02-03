@@ -19,6 +19,8 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
+#include "NodoRN.h"
+#include <map>
 
 using namespace std;
 
@@ -38,6 +40,7 @@ public:
     bool registrarSalida(const string& placa);
     void mostrarHistorial() const;
     string buscarHistorial(const string& placa) const;
+    NodoRN* buscarNodoID(NodoRN* nodo, const string& espacioId) const;
     void mostrarHistorialPorFecha(const string& fecha) const;
     void mostrarHistorialPorFechaYPlaca(const string& fecha, const string& placa) const;
     void mostrarHistorialPorRangoHoras(const string& horaInicio, const string& horaFin) const;
@@ -51,6 +54,10 @@ public:
     void mostrarEspacioMasMenosOcupado() const;
     void imprimirArbol();
     void mostrarRecorridos() const;
+    int obtenerAltura(NodoRN* nodo) const;
+    int obtenerAlturaNegra(NodoRN* nodo) const;
+    NodoRN* obtenerRaiz();
+    int obtenerProfundidad(NodoRN* nodo);
 };
 
 #endif
