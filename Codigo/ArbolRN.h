@@ -4,6 +4,8 @@
 #include "NodoRN.h"
 #include <iostream>
 #include <vector>
+#include <SFML/Graphics.hpp>
+using namespace sf;
 using namespace std;
 
 enum Color { ROJO, NEGRO };
@@ -24,6 +26,7 @@ private:
 
     NodoRN* buscarNodo(NodoRN* nodo, const string& placa) const;
     void imprimirInOrden(NodoRN* nodo) const;
+    void drawTree(sf::RenderWindow &window, NodoRN *nodo, int x, int y, int offset, sf::Font &font);
     
 public:
     // Constructor
@@ -37,8 +40,6 @@ public:
 
     // Recorrido
     vector<NodoRN*> obtenerInOrden() const;
-    void imprimirArbol() const;
-    void imprimirArbolVertical() const;
     void recorridoPreorden(NodoRN* nodo) const;
     void recorridoInorden(NodoRN* nodo) const;
     void recorridoPostorden(NodoRN* nodo) const;
@@ -47,6 +48,7 @@ public:
     NodoRN* obtenerRaiz();
     int obtenerAlturaNegra(NodoRN* nodo) const;
     int obtenerProfundidad(NodoRN* nodo);
+    void imprimirArbolGrafico();
 
     // Destructor
     ~ArbolRN();

@@ -4,12 +4,14 @@
 #include <iomanip>  // Para formato de impresión
 #include <cmath>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 // Definición de colores para la consola
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
 #define WHITE   "\033[37m"
 
+using namespace sf;
 using namespace std;
 
 // Constructor: inicializa el árbol con un nodo nulo
@@ -188,17 +190,6 @@ void ArbolRN::eliminarNodo(NodoRN* nodo) {
     }
 }
 
-void ArbolRN::imprimirArbol() const {
-    if (raiz == nulo) {
-        cout << "El árbol está vacío.\n";
-        return;
-    }
-
-    cout << "Árbol Rojo-Negro (In-Orden):\n";
-    imprimirInOrden(raiz);
-    cout << endl;
-}
-
 // Función auxiliar para imprimir en orden
 void ArbolRN::imprimirInOrden(NodoRN* nodo) const {
     if (nodo != nulo) {
@@ -207,76 +198,6 @@ void ArbolRN::imprimirInOrden(NodoRN* nodo) const {
              << " | Ingreso: " << nodo->fechaHoraIngreso
              << " | Color: " << (nodo->color ? "Rojo" : "Negro") << endl;
         imprimirInOrden(nodo->derecho);
-    }
-}
-
-void ArbolRN::imprimirArbolVertical() const {
-    if (raiz == nulo) {
-        cout << "El árbol está vacío.\n";
-        return;
-    }
-
-    // Cola para el recorrido por niveles
-    queue<pair<NodoRN*, int>> cola;
-    cola.push({raiz, 0});  // Nodo con su nivel
-
-    // Variables para determinar la altura máxima del árbol
-    int altura = 0;
-    while (!cola.empty()) {
-        NodoRN* actual = cola.front().first;
-        int nivel = cola.front().second;
-        cola.pop();
-
-        altura = max(altura, nivel);  // Actualizar la altura máxima
-
-        if (actual->izquierdo != nulo) cola.push({actual->izquierdo, nivel + 1});
-        if (actual->derecho != nulo) cola.push({actual->derecho, nivel + 1});
-    }
-
-    // Depuración: Mostrar la altura del árbol
-    cout << "Altura del árbol: " << altura << endl;
-
-    // Cola para la impresión
-    queue<pair<NodoRN*, int>> colaImpresion;
-    cola.push({raiz, 0});  // Nodo raíz
-
-    // Espaciado fijo entre nodos
-    int espacioBase = 1;  // Reducido a 1 para más cercanía
-
-    // Recorrer el árbol nivel por nivel
-    for (int nivel = 0; nivel <= altura; ++nivel) {
-        // Imprimir el nivel actual
-        cout << "Nivel " << nivel << ": ";
-
-        int tamanoNivel = cola.size();
-
-        // Ajustar el espaciado entre nodos en niveles más profundos
-        int nivelEspaciado = espacioBase * (altura - nivel + 1);  // Menos espaciado a medida que bajamos
-
-        while (tamanoNivel > 0) {
-            pair<NodoRN*, int> nodoNivel = cola.front();
-            cola.pop();
-
-            NodoRN* actual = nodoNivel.first;
-            int nivelNodo = nodoNivel.second;
-
-            if (nivelNodo == nivel) {
-                // Si estamos en el primer nivel (raíz), colocarla centrada
-                if (nivel == 0) {
-                    cout << setw(altura * 2) << (actual->color ? RED : WHITE) << actual->espacioId << RESET;
-                } else {
-                    // Imprimir el nodo con color y espaciado
-                    cout << setw(nivelEspaciado) << (actual->color ? RED : WHITE) << actual->espacioId << RESET;
-                }
-            }
-
-            // Agregar los hijos a la cola si no son nulos
-            if (actual->izquierdo != nulo) cola.push({actual->izquierdo, nivelNodo + 1});
-            if (actual->derecho != nulo) cola.push({actual->derecho, nivelNodo + 1});
-
-            tamanoNivel--;
-        }
-        cout << endl; // Nueva línea para el siguiente nivel
     }
 }
 
@@ -387,3 +308,88 @@ NodoRN* ArbolRN::buscarNodoID(NodoRN* nodo, const string& espacioId) const {
     // Si el espacioId es mayor que el del nodo actual, busca en el subárbol derecho
     return buscarNodo(nodo->derecho, espacioId);
 }
+
+void ArbolRN::imprimirArbolGrafico() 
+{
+    if (this->raiz == this->nulo)
+    {
+        std::cout << "El árbol está vacío.\n";
+        return;
+    }
+
+    // Aumentar tamaño de la ventana
+    sf::RenderWindow window(sf::VideoMode(1600, 900), "Árbol Rojo-Negro");
+    // Cargar la fuente UNA SOLA VEZ
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf"))
+    {
+        std::cerr << "No se pudo cargar la fuente\n";
+        return;
+    }
+
+    // Ciclo de eventos
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+        window.clear(sf::Color::White); // Limpiar ventana
+
+        // Dibujar el árbol con más espacio inicial
+        drawTree(window, raiz, window.getSize().x / 2, 100, window.getSize().x / 7, font);
+
+        window.display(); // Mostrar cambios
+    }
+}
+
+void ArbolRN::drawTree(sf::RenderWindow &window, NodoRN *nodo, int x, int y, int offset, sf::Font &font)
+{
+    if (nodo == this->nulo)
+        return;
+
+    // Dibujar nodo
+    sf::CircleShape nodeShape(20);
+    nodeShape.setFillColor(nodo->color ? sf::Color::Red : sf::Color::Black);
+    nodeShape.setOutlineColor(sf::Color::White);
+    nodeShape.setOutlineThickness(2);
+    nodeShape.setPosition(x - 20, y - 20);
+    window.draw(nodeShape);
+
+    // Dibujar texto dentro del nodo
+    sf::Text nodeText(nodo->espacioId, font, 15);
+    nodeText.setFillColor(sf::Color::White);
+
+    // Centrar el texto dentro del círculo
+    sf::FloatRect textBounds = nodeText.getLocalBounds();
+    nodeText.setOrigin(textBounds.width / 2, textBounds.height / 2);
+    nodeText.setPosition(x, y - textBounds.height / 2);
+    
+    window.draw(nodeText);
+
+    // Ajustar el espaciado entre nodos de manera más uniforme
+    int newOffset = std::max(offset * 0.85, 50.0);  // Se reduce menos agresivamente
+    int verticalSpacing = 80;  // Aumentar separación vertical para más claridad
+
+    if (nodo->izquierdo != this->nulo)
+    {
+        sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(x, y), sf::Color::Black),
+            sf::Vertex(sf::Vector2f(x - newOffset, y + verticalSpacing), sf::Color::Black)};
+        window.draw(line, 2, sf::Lines);
+        drawTree(window, nodo->izquierdo, x - newOffset, y + verticalSpacing, newOffset, font);
+    }
+
+    if (nodo->derecho != this->nulo)
+    {
+        sf::Vertex line[] = {
+            sf::Vertex(sf::Vector2f(x, y), sf::Color::Black),
+            sf::Vertex(sf::Vector2f(x + newOffset, y + verticalSpacing), sf::Color::Black)};
+        window.draw(line, 2, sf::Lines);
+        drawTree(window, nodo->derecho, x + newOffset, y + verticalSpacing, newOffset, font);
+    }
+}
+

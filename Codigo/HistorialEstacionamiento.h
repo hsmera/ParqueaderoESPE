@@ -52,7 +52,7 @@ public:
     bool estaEnRangoDuracion(const string& duracion, const string& duracionMin, const string& duracionMax) const;
     void mostrarEspacioMasMenosTiempoOcupado() const ;
     void mostrarEspacioMasMenosOcupado() const;
-    void imprimirArbol();
+    void imprimirArbolGrafico();
     void mostrarRecorridos() const;
     int obtenerAltura(NodoRN* nodo) const;
     int obtenerAlturaNegra(NodoRN* nodo) const;

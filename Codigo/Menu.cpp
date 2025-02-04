@@ -157,7 +157,7 @@ void Menu::ejecutarOpcion()
         break;
     case 6:
     {
-        historial->imprimirArbol();
+        historial->imprimirArbolGrafico();
         break;
     }
     case 7:
